@@ -76,6 +76,21 @@
    "lat": 28.9931,
    "lon": 77.0151,
    "via_only": true
+  },
+  "KKDE": {
+   "name": "Kurukshetra Jn",
+   "lat": 29.9696,
+   "lon": 76.8783
+  },
+  "UMB": {
+   "name": "Ambala Cantt Jn",
+   "lat": 30.3382,
+   "lon": 76.8273
+  },
+  "NZM": {
+   "name": "Hazrat Nizamuddin",
+   "lat": 28.588,
+   "lon": 77.2536
   }
  },
  "paths": {
@@ -161,6 +176,68 @@
    "KRJ",
    "GZB",
    "NDLS"
+  ],
+  "GZB-PNP": [
+   "GZB",
+   "NDLS",
+   "DLI",
+   "SNP",
+   "PNP"
+  ],
+  "PNP-NDLS": [
+   "PNP",
+   "SNP",
+   "DLI",
+   "NDLS"
+  ],
+  "NDLS-KKDE": [
+   "NDLS",
+   "DLI",
+   "SNP",
+   "PNP",
+   "KKDE"
+  ],
+  "KKDE-DLI": [
+   "KKDE",
+   "PNP",
+   "SNP",
+   "DLI"
+  ],
+  "PNP-UMB": [
+   "PNP",
+   "KKDE",
+   "UMB"
+  ],
+  "UMB-KKDE": [
+   "UMB",
+   "KKDE"
+  ],
+  "KKDE-UMB": [
+   "KKDE",
+   "UMB"
+  ],
+  "KKDE-NZM": [
+   "KKDE",
+   "PNP",
+   "SNP",
+   "DLI",
+   "NDLS",
+   "NZM"
+  ],
+  "NZM-KKDE": [
+   "NZM",
+   "NDLS",
+   "DLI",
+   "SNP",
+   "PNP",
+   "KKDE"
+  ],
+  "PNP-GZB": [
+   "PNP",
+   "SNP",
+   "DLI",
+   "NDLS",
+   "GZB"
   ]
  }
 }

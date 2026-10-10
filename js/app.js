@@ -49,7 +49,10 @@
   function setupSearch() {
     const input = $('#trainSearch'), list = $('#trainList'), msg = $('#searchMsg');
     const index = [];
-    state.data.links.forEach((l) => l.services.forEach((s) => index.push({ train: s.train_no, link: l, s })));
+    state.data.links.forEach((l) => {
+      l.services.forEach((s) => index.push({ train: s.train_no, link: l, s }));
+      (l.sheet_only || []).forEach((s) => index.push({ train: s.train_no, link: l, s, sheetOnly: true }));
+    });
     list.replaceChildren(...index.map((r) => el('option', { value: r.train }, `${r.s.from}-${r.s.to} · Link ${String(r.link.no).padStart(2, '0')} ${r.link.name}`)));
     const go = () => {
       const q = input.value.replace(/\D/g, '');
@@ -58,8 +61,12 @@
       const hits = exact ? [exact] : index.filter((r) => r.train.startsWith(q));
       const links = [...new Set(hits.map((r) => r.link.no))];
       if (hits.length && links.length === 1 && (exact || hits.length === 1)) {
-        msg.hidden = true;
-        openLink(hits[0].link.no, hits[0].train);
+        openLink(hits[0].link.no, hits[0].sheetOnly ? null : hits[0].train);
+        msg.hidden = !hits[0].sheetOnly;
+        if (hits[0].sheetOnly) {
+          msg.textContent = `${hits[0].train} is listed under this link in the sheet but is not in the ICMS link`;
+          document.getElementById('diffCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         input.blur();
       } else if (hits.length) {
         msg.hidden = false;
@@ -119,10 +126,10 @@
     // route
     const line = $('#routeLine');
     line.replaceChildren();
-    m.route.forEach((code, i) => {
+    m.route.forEach(({ code, svc, ecr }, i) => {
       if (i) {
-        const s = m.services[i - 1];
-        line.append(el('span', { class: 'ar' + (s.in_division ? '' : ' oth'), title: `${s.train_no}` }, '→'));
+        if (ecr) line.append(el('span', { class: 'ar ecr', title: 'Empty rake' }, '⇢'));
+        else line.append(el('span', { class: 'ar' + (svc.in_division ? '' : ' oth'), title: `${svc.train_no}` }, '→'));
       }
       const isPM = (i === 0 || i === m.route.length - 1) && code === l.pm_station;
       line.append(el('span', {
@@ -145,7 +152,7 @@
     }
 
     // longest halt
-    const hs = m.halts.slice().sort((a, b) => b.mins - a.mins);
+    const hs = m.halts.filter((h) => !h.ecr).sort((a, b) => b.mins - a.mins);
     const top = hs[0], next = hs.find((h) => h.at !== top.at);
     $('#haltVal').replaceChildren(M.dur(top.mins), el('small', {}, `at ${top.at}`));
     $('#haltHint').textContent = `${M.stamp(top.fromAbs)} → ${top.wraps ? 'next cycle ' : ''}${M.hhmm(top.toAbs)}${top.at === l.pm_station ? ' (PM)' : ''}`
@@ -165,27 +172,41 @@
       svcs.forEach((s, i) => {
         const idx = m.services.indexOf(s);
         const prev = m.services[idx - 1];
+        if (i === 0 && prev && prev.haltAfter.ecr) {
+          flow.append(el('div', { class: 'seg ecr', title: prev.haltAfter.ecr.note || 'Empty rake' },
+            el('div', { class: 'no' }, 'Empty'), el('div', { class: 'bar' }), el('div', { class: 'rt' }, `${prev.to} → ${s.from}`)));
+        }
         if (i === 0) {
           // opening node of the day
           const lines = [];
-          if (prev) lines.push(el('div', { class: 't' }, `arr D${prev.arr_day} ${prev.arr}`));
+          if (prev && prev.haltAfter.ecr) lines.push(el('div', { class: 't ecr-t' }, `empty rake ex ${prev.to}`));
+          else if (prev) lines.push(el('div', { class: 't' }, `arr D${prev.arr_day} ${prev.arr}`));
           lines.push(el('div', { class: 't' }, 'dep ', el('b', {}, s.dep), tag(s.dep_tag)));
           flow.append(node(s.from, lines, null, !stnInDiv(s.from)));
         }
         flow.append(segment(s));
         const nx = m.services[idx + 1];
         const h = s.haltAfter;
-        const lines = [el('div', { class: 't' }, 'arr ', el('b', {}, s.arr))];
-        if (nx && nx.dep_day === d) {
+        const lines = [el('div', { class: 't' }, 'arr ', el('b', {}, s.arr), tag(s.arr_tag))];
+        if (h.ecr) {
+          lines.push(el('div', { class: 't ecr-t' }, `empty rake to ${h.ecr.to}`));
+        } else if (nx && nx.dep_day === d) {
           lines.push(el('div', { class: 't' }, 'dep ', el('b', {}, nx.dep), tag(nx.dep_tag)));
         } else if (nx) {
           lines.push(el('div', { class: 't' }, `dep D${nx.dep_day} ${nx.dep}`, tag(nx.dep_tag)));
         } else {
           lines.push(el('div', { class: 't' }, `next cycle ${m.services[0].dep}`, tag(m.services[0].dep_tag)));
         }
-        const haltTxt = el('div', { class: 'halt' + (h.mins >= longCut ? ' long' : '') },
-          `halt ${M.dur(h.mins)}${!nx ? ' · ↺ Day 1' : nx.dep_day !== d ? ` · ↓ Day ${nx.dep_day}` : ''}`);
+        const haltTxt = h.ecr
+          ? el('div', { class: 'halt' }, `${M.dur(h.mins)} till dep ex ${h.ecr.to}${nx && nx.dep_day !== d ? ` · ↓ Day ${nx.dep_day}` : ''}`)
+          : el('div', { class: 'halt' + (h.mins >= longCut ? ' long' : '') },
+            `halt ${M.dur(h.mins)}${!nx ? ' · ↺ Day 1' : nx.dep_day !== d ? ` · ↓ Day ${nx.dep_day}` : ''}`);
         flow.append(node(s.to, lines, haltTxt, !stnInDiv(s.to)));
+        if (h.ecr && nx && nx.dep_day === d) {
+          flow.append(el('div', { class: 'seg ecr', title: h.ecr.note || 'Empty rake' },
+            el('div', { class: 'no' }, 'Empty'), el('div', { class: 'bar' }), el('div', { class: 'rt' }, `${h.ecr.from} → ${h.ecr.to}`)));
+          flow.append(node(h.ecr.to, [el('div', { class: 't' }, 'dep ', el('b', {}, nx.dep), tag(nx.dep_tag))], null, false));
+        }
       });
       box.append(el('div', { class: 'day' }, el('div', { class: 'day-lbl' }, 'Day', el('b', {}, String(d))), flow));
     }
@@ -234,7 +255,13 @@
       lines.push({ s, pl, casing });
     });
 
-    const used = new Set(state.model.route);
+    state.model.halts.filter((h) => h.ecr).forEach((h) => {
+      const pts = (state.paths[`${h.ecr.from}-${h.ecr.to}`] || [h.ecr.from, h.ecr.to]).filter((c) => state.stations[c]).map(coord);
+      L.polyline(pts, { color: css('--ecr'), weight: 4, opacity: .95, dashArray: '2 8', lineCap: 'round' })
+        .bindTooltip(`<b>Empty rake</b> ${h.ecr.from} → ${h.ecr.to}${h.ecr.note ? '<br>' + h.ecr.note : ''}`, { sticky: true })
+        .addTo(lineLayer);
+    });
+    const used = new Set(state.model.route.map((r) => r.code));
     const drawn = new Set(state.model.services.flatMap((s) => state.paths[`${s.from}-${s.to}`] || [s.from, s.to]));
     drawn.forEach((code) => {
       if (!state.stations[code]) return;
@@ -295,7 +322,9 @@
       pin && pin.setLatLng(coord(p.at));
       if (node) { node.textContent = p.at; node.classList.remove('running'); }
       const nx = p.halt.next;
-      msg = [el('b', {}, `At ${stnName(p.at)}`), ` · next ${nx.train_no} dep D${p.halt.wraps ? 1 : nx.dep_day} ${nx.dep}`];
+      msg = p.halt.ecr
+        ? [el('b', {}, `Empty rake ${p.halt.ecr.from} → ${p.halt.ecr.to}`), ` · arr ${p.halt.ecr.from} ${M.hhmm(p.halt.fromAbs)}, next ${nx.train_no} dep ${nx.from} D${nx.dep_day} ${nx.dep}`]
+        : [el('b', {}, `At ${stnName(p.at)}`), ` · next ${nx.train_no} dep D${p.halt.wraps ? 1 : nx.dep_day} ${nx.dep}`];
     }
     $('#nowBoard').replaceChildren(el('i'), el('span', {}, ...msg));
     const nl = $('#timeline .nowline');
@@ -363,7 +392,7 @@
       const g = s('g', { class: 'halt' });
       const y = tlRowY(d);
       g.append(s('rect', { x: tlX(a), y: y + 9, width: Math.max(0, tlX(b) - tlX(a)), height: 8, rx: 3 }));
-      if (tlX(b) - tlX(a) > 34) g.append(s('text', { x: (tlX(a) + tlX(b)) / 2, y: y + 32, 'text-anchor': 'middle' }, h.at));
+      if (tlX(b) - tlX(a) > 34) g.append(s('text', { x: (tlX(a) + tlX(b)) / 2, y: y + 32, 'text-anchor': 'middle' }, h.ecr ? `ECR ${h.ecr.from}→${h.ecr.to}` : h.at));
       g.addEventListener('mousemove', (e) => tip(e, `<b>${h.at}</b> halt ${M.dur(h.mins)}<br>${M.stamp(h.fromAbs)} → ${h.wraps ? 'next cycle ' + M.hhmm(h.toAbs) : M.stamp(h.toAbs)}`));
       g.addEventListener('mouseleave', hideTip);
       g.addEventListener('click', (e) => { e.stopPropagation(); select({ type: 'stn', code: h.at }); });
@@ -395,7 +424,8 @@
   /* ---------- sheet vs ICMS ---------- */
   function renderDiffs() {
     const rows = state.model.services.filter((s) => s.sheet && (s.sheet.dep !== s.dep || s.sheet.arr !== s.arr));
-    $('#diffCard').hidden = !rows.length;
+    const only = state.link.sheet_only || [];
+    $('#diffCard').hidden = !rows.length && !only.length;
     const cell = (a, b) => el('td', { class: 'mono' + (a !== b ? ' diff' : '') }, a);
     $('#diffTable').replaceChildren(
       el('thead', {}, el('tr', {}, ...['Train', 'From → To', 'Dep (sheet)', 'Dep (ICMS)', 'Arr (sheet)', 'Arr (ICMS)'].map((h) => el('th', {}, h)))),
@@ -403,7 +433,12 @@
         el('td', { class: 'mono' }, el('b', {}, s.train_no)),
         el('td', {}, `${s.from} → ${s.to}`),
         cell(s.sheet.dep, s.dep), el('td', { class: 'mono' }, s.dep),
-        cell(s.sheet.arr, s.arr), el('td', { class: 'mono' }, s.arr)))),
+        cell(s.sheet.arr, s.arr), el('td', { class: 'mono' }, s.arr))),
+        ...only.map((s) => el('tr', {},
+          el('td', { class: 'mono' }, el('b', {}, s.train_no)),
+          el('td', {}, `${s.from} → ${s.to}`),
+          el('td', { class: 'mono diff' }, s.dep), el('td', { class: 'muted' }, 'not in link'),
+          el('td', { class: 'mono diff' }, s.arr), el('td', { class: 'muted' }, 'not in link')))),
     );
   }
 
@@ -413,7 +448,7 @@
     $('#clearSel').hidden = !state.sel;
     if (!state.sel) {
       $('#sideTitle').textContent = 'Station board';
-      const codes = m.route.filter((c, i, a) => a.indexOf(c) === i);
+      const codes = [...new Set(m.route.map((r) => r.code))];
       body.replaceChildren(
         el('p', { class: 'muted small', style: 'margin:0' }, 'Pick a station to see its arrivals and departures in this link.'),
         el('div', { class: 'stn-pick' }, ...codes.map((c) => el('button', { class: 'chip-btn', onclick: () => select({ type: 'stn', code: c }) }, c))),

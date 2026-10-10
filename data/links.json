@@ -431,6 +431,251 @@
      }
     }
    ]
+  },
+  {
+   "no": 3,
+   "name": "GZB-PNP-NDLS-KKDE-DLI-UMB-NZM",
+   "sheet_title": "04. 16 CAR MEMU (05 RAKE)",
+   "stock": "MEMU",
+   "cars": 16,
+   "rakes": 4,
+   "rakes_in_sheet": 5,
+   "pm_depot": "CYZ",
+   "pm_station": "GZB",
+   "timing_source": "ICMS rake link",
+   "notes": "Empty rake (ECR) of 64481 goes from UMB to KKDE to work 64462. Sheet also lists 14545/14546 DLI\u2013SRE\u2013DLI under this link; they are not in the ICMS link.",
+   "services": [
+    {
+     "seq": 1,
+     "train_no": "64471",
+     "from": "GZB",
+     "dep": "17:05",
+     "dep_day": 1,
+     "to": "PNP",
+     "arr": "20:40",
+     "arr_day": 1,
+     "dep_tag": "PM",
+     "in_division": true,
+     "sheet": {
+      "dep": "17:05",
+      "arr": "20:40"
+     },
+     "arr_tag": "R"
+    },
+    {
+     "seq": 2,
+     "train_no": "64464",
+     "from": "PNP",
+     "dep": "04:55",
+     "dep_day": 2,
+     "to": "NDLS",
+     "arr": "07:30",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "04:55",
+      "arr": "07:30"
+     }
+    },
+    {
+     "seq": 3,
+     "train_no": "64465",
+     "from": "NDLS",
+     "dep": "07:55",
+     "dep_day": 2,
+     "to": "KKDE",
+     "arr": "11:40",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "07:55",
+      "arr": "11:40"
+     }
+    },
+    {
+     "seq": 4,
+     "train_no": "64454",
+     "from": "KKDE",
+     "dep": "12:50",
+     "dep_day": 2,
+     "to": "DLI",
+     "arr": "16:40",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "12:50",
+      "arr": "16:40"
+     }
+    },
+    {
+     "seq": 5,
+     "train_no": "64453",
+     "from": "DLI",
+     "dep": "17:35",
+     "dep_day": 2,
+     "to": "PNP",
+     "arr": "19:45",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "17:35",
+      "arr": "19:45"
+     }
+    },
+    {
+     "seq": 6,
+     "train_no": "64481",
+     "from": "PNP",
+     "dep": "20:00",
+     "dep_day": 2,
+     "to": "UMB",
+     "arr": "22:50",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "20:00",
+      "arr": "22:50"
+     },
+     "ecr_after": {
+      "from": "UMB",
+      "to": "KKDE",
+      "note": "ECR of 64481 will go to KKDE ex UMB to work 64462"
+     }
+    },
+    {
+     "seq": 7,
+     "train_no": "64462",
+     "from": "KKDE",
+     "dep": "05:35",
+     "dep_day": 3,
+     "to": "NZM",
+     "arr": "09:52",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "05:35",
+      "arr": "09:52"
+     }
+    },
+    {
+     "seq": 8,
+     "train_no": "64461",
+     "from": "NZM",
+     "dep": "18:10",
+     "dep_day": 3,
+     "to": "KKDE",
+     "arr": "22:45",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "18:10",
+      "arr": "22:45"
+     }
+    },
+    {
+     "seq": 9,
+     "train_no": "64483",
+     "from": "KKDE",
+     "dep": "23:10",
+     "dep_day": 3,
+     "to": "UMB",
+     "arr": "00:15",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "23:10",
+      "arr": "00:15"
+     }
+    },
+    {
+     "seq": 10,
+     "train_no": "64482",
+     "from": "UMB",
+     "dep": "04:45",
+     "dep_day": 4,
+     "to": "KKDE",
+     "arr": "05:40",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "04:45",
+      "arr": "05:40"
+     }
+    },
+    {
+     "seq": 11,
+     "train_no": "64452",
+     "from": "KKDE",
+     "dep": "05:55",
+     "dep_day": 4,
+     "to": "DLI",
+     "arr": "09:35",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "05:55",
+      "arr": "09:35"
+     }
+    },
+    {
+     "seq": 12,
+     "train_no": "64451",
+     "from": "DLI",
+     "dep": "16:50",
+     "dep_day": 4,
+     "to": "PNP",
+     "arr": "19:25",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "16:40",
+      "arr": "19:00"
+     }
+    },
+    {
+     "seq": 13,
+     "train_no": "64472",
+     "from": "PNP",
+     "dep": "06:00",
+     "dep_day": 5,
+     "to": "GZB",
+     "arr": "09:10",
+     "arr_day": 5,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "06:00",
+      "arr": "09:10"
+     }
+    }
+   ],
+   "sheet_only": [
+    {
+     "train_no": "14545",
+     "from": "DLI",
+     "to": "SRE",
+     "dep": "17:15",
+     "arr": "21:40"
+    },
+    {
+     "train_no": "14546",
+     "from": "SRE",
+     "to": "DLI",
+     "dep": "06:15",
+     "arr": "10:10"
+    }
+   ]
   }
  ]
 }

@@ -39,11 +39,18 @@
     const halts = svcs.map((s, i) => {
       const nx = svcs[i + 1];
       const toAbs = nx ? nx.depAbs : first.depAbs + cycle;
-      return { at: s.to, fromAbs: s.arrAbs, toAbs, mins: toAbs - s.arrAbs, next: nx || first, wraps: !nx };
+      const next = nx || first;
+      const ecr = s.to !== next.from ? { from: s.to, to: next.from, note: s.ecr_after ? s.ecr_after.note : '' } : null;
+      return { at: s.to, fromAbs: s.arrAbs, toAbs, mins: toAbs - s.arrAbs, next, wraps: !nx, ecr };
     });
     svcs.forEach((s, i) => { s.haltAfter = halts[i]; });
     const closed = last.to === first.from;
-    const route = [first.from, ...svcs.map((s) => s.to)];
+    // stations in working order; an empty-rake move adds the station the rake is moved to
+    const route = [{ code: first.from }];
+    svcs.forEach((s, i) => {
+      route.push({ code: s.to, svc: s });
+      if (halts[i].ecr && svcs[i + 1]) route.push({ code: halts[i].ecr.to, ecr: true });
+    });
     return { services: svcs, halts, days, cycle, closed, route, start: first.depAbs };
   }
 
