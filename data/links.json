@@ -1,0 +1,23 @@
+{
+  "source": "passenger_link_Rake.xlsx (Sheet1)",
+  "division": "Delhi Division, Northern Railway",
+  "links": [
+    {
+      "no": 1,
+      "title": "01. 12 CAR MEMU (02 RAKE) 04 service run in NCR",
+      "stock": "MEMU",
+      "cars": 12,
+      "rakes_as_per_sheet": 2,
+      "remarks": "04 service run in NCR",
+      "sheet_rows": "1-7",
+      "services": [
+        { "sr": 1, "train_no": "64417", "route": "GZB-NDLS-DLI", "from": "GZB",  "dep": "06:35", "to": "DLI",  "arr": "07:50", "dep_raw": "GZB 06.35",  "arr_raw": "DLI-07.50" },
+        { "sr": 2, "train_no": "64152", "route": "DLI-ALJN",     "from": "DLI",  "dep": "08:30", "to": "ALJN", "arr": "11:30", "dep_raw": "DLI-08:30",  "arr_raw": "ALJN-11:30" },
+        { "sr": 3, "train_no": "64957", "route": "AGC-PWL",      "from": "AGC",  "dep": "18:00", "to": "PWL",  "arr": "21:35", "dep_raw": "AGC-18.00",  "arr_raw": "PWL-21:35" },
+        { "sr": 4, "train_no": "64958", "route": "PWL-AGC",      "from": "PWL",  "dep": "04:35", "to": "AGC",  "arr": "07:30", "dep_raw": "PWL-04.35",  "arr_raw": "AGC -07:30" },
+        { "sr": 5, "train_no": "64151", "route": "ALJN-DLI",     "from": "ALJN", "dep": "15:05", "to": "DLI",  "arr": "18:15", "dep_raw": "ALJN-15:05", "arr_raw": "DLI-18:15" },
+        { "sr": 6, "train_no": "64418", "route": "DLI-GZB",      "from": "DLI",  "dep": "18:35", "to": "GZB",  "arr": "19:50", "dep_raw": "DLI-18:35",  "arr_raw": "GZB-19:50" }
+      ]
+    }
+  ]
+}

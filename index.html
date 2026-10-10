@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Passenger Rake Links · Delhi Division</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><rect x="5" y="4" width="22" height="20" rx="5"/><rect x="9" y="8" width="14" height="7" rx="1.5" class="win"/><circle cx="11" cy="19.5" r="1.6" class="win"/><circle cx="21" cy="19.5" r="1.6" class="win"/><path d="M9 24 6 29M23 24l3 5" /></svg>
+      </div>
+      <div>
+        <h1>Passenger Rake Links</h1>
+        <p class="sub">Delhi Division · Northern Railway</p>
+      </div>
+    </div>
+    <div class="controls">
+      <label class="select">
+        <span>Link</span>
+        <select id="linkSelect" aria-label="Select rake link"></select>
+      </label>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="link-head">
+      <div>
+        <div class="chips" id="linkChips"></div>
+        <h2 id="linkTitle">Loading…</h2>
+        <p class="muted" id="linkNote"></p>
+      </div>
+      <div class="check" id="rakeCheck"></div>
+    </section>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="grid-main">
+      <article class="card map-card">
+        <div class="card-head">
+          <div>
+            <h3>Route map</h3>
+            <p class="muted small">Click a station or a train. Use the clock to see where each rake is.</p>
+          </div>
+          <div class="legend" id="rakeLegend"></div>
+        </div>
+        <div id="map"></div>
+        <div class="clock">
+          <button id="playBtn" class="btn" aria-label="Play">▶</button>
+          <input id="timeSlider" type="range" min="0" max="1439" step="1" value="480" aria-label="Time of day">
+          <output id="timeOut" class="mono">08:00</output>
+          <div class="speed">
+            <button class="chip-btn" data-speed="10" title="10 min per second">Slow</button>
+            <button class="chip-btn on" data-speed="30" title="30 min per second">Normal</button>
+            <button class="chip-btn" data-speed="90" title="90 min per second">Fast</button>
+          </div>
+        </div>
+        <div class="now" id="nowBoard"></div>
+      </article>
+
+      <aside class="card side-card">
+        <div class="card-head">
+          <h3 id="sideTitle">Station board</h3>
+          <button class="link-btn" id="clearSel" hidden>Clear ×</button>
+        </div>
+        <div id="sideBody" class="side-body"><p class="muted">Select a station on the map.</p></div>
+      </aside>
+    </section>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h3>Rake cycle · 24 hours</h3>
+          <p class="muted small">Each row is one rake. Coloured bars are running trains; grey gaps are halts at the station shown.</p>
+        </div>
+      </div>
+      <div id="timeline" class="timeline"></div>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h3>Services</h3>
+          <p class="muted small">As in the sheet. Rake is worked out by chaining arrival station to next departure.</p>
+        </div>
+        <input id="search" class="search" type="search" placeholder="Search train / station…">
+      </div>
+      <div class="table-wrap">
+        <table id="svcTable">
+          <thead>
+            <tr>
+              <th data-k="sr">Sr</th>
+              <th data-k="train_no">Train</th>
+              <th data-k="route">Route</th>
+              <th data-k="dep">Dep</th>
+              <th data-k="arr">Arr</th>
+              <th data-k="run">Run</th>
+              <th data-k="rake">Rake</th>
+              <th data-k="next">Next working</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </article>
+
+    <footer class="foot muted small">
+      <span id="srcNote"></span>
+      <span>Map positions are approximate. Map data © OpenStreetMap contributors, © CARTO.</span>
+    </footer>
+  </main>
+
+  <div id="tip" class="tip" hidden></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

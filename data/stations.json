@@ -1,0 +1,22 @@
+{
+  "note": "Station positions are approximate, for map display only. Paths list the stations a route line is drawn through on the map; intermediate stations are drawing points, not halts.",
+  "stations": {
+    "DLI":  { "name": "Delhi Jn",     "lat": 28.6612, "lon": 77.2276 },
+    "NDLS": { "name": "New Delhi",    "lat": 28.6425, "lon": 77.2192 },
+    "GZB":  { "name": "Ghaziabad Jn", "lat": 28.6499, "lon": 77.4294 },
+    "KRJ":  { "name": "Khurja Jn",    "lat": 28.2520, "lon": 77.8480, "via_only": true },
+    "ALJN": { "name": "Aligarh Jn",   "lat": 27.8925, "lon": 78.0745 },
+    "PWL":  { "name": "Palwal",       "lat": 28.1442, "lon": 77.3317 },
+    "KSV":  { "name": "Kosi Kalan",   "lat": 27.7930, "lon": 77.4380, "via_only": true },
+    "MTJ":  { "name": "Mathura Jn",   "lat": 27.4800, "lon": 77.6830, "via_only": true },
+    "AGC":  { "name": "Agra Cantt",   "lat": 27.1585, "lon": 77.9900 }
+  },
+  "paths": {
+    "GZB-NDLS-DLI": ["GZB", "NDLS", "DLI"],
+    "DLI-ALJN":     ["DLI", "GZB", "KRJ", "ALJN"],
+    "ALJN-DLI":     ["ALJN", "KRJ", "GZB", "DLI"],
+    "DLI-GZB":      ["DLI", "GZB"],
+    "AGC-PWL":      ["AGC", "MTJ", "KSV", "PWL"],
+    "PWL-AGC":      ["PWL", "KSV", "MTJ", "AGC"]
+  }
+}
