@@ -1,22 +1,30 @@
 {
-  "source": "passenger_link_Rake.xlsx (Sheet1)",
+  "source": "passenger_link_Rake.xlsx (Sheet1) and ICMS rake link",
   "division": "Delhi Division, Northern Railway",
   "links": [
     {
       "no": 1,
-      "title": "01. 12 CAR MEMU (02 RAKE) 04 service run in NCR",
+      "title": "12 CAR MEMU",
+      "sheet_title": "01. 12 CAR MEMU (02 RAKE) 04 service run in NCR",
       "stock": "MEMU",
       "cars": 12,
-      "rakes_as_per_sheet": 2,
-      "remarks": "04 service run in NCR",
-      "sheet_rows": "1-7",
+      "rakes": 4,
+      "rakes_in_sheet": 2,
+      "pm_depot": "DLI",
+      "pm_station": "GZB",
+      "timing_source": "ICMS rake link",
+      "notes": "Services ALJN–TDL–AGC and AGC–TDL–ALJN run outside Delhi Division and are not listed in the sheet.",
       "services": [
-        { "sr": 1, "train_no": "64417", "route": "GZB-NDLS-DLI", "from": "GZB",  "dep": "06:35", "to": "DLI",  "arr": "07:50", "dep_raw": "GZB 06.35",  "arr_raw": "DLI-07.50" },
-        { "sr": 2, "train_no": "64152", "route": "DLI-ALJN",     "from": "DLI",  "dep": "08:30", "to": "ALJN", "arr": "11:30", "dep_raw": "DLI-08:30",  "arr_raw": "ALJN-11:30" },
-        { "sr": 3, "train_no": "64957", "route": "AGC-PWL",      "from": "AGC",  "dep": "18:00", "to": "PWL",  "arr": "21:35", "dep_raw": "AGC-18.00",  "arr_raw": "PWL-21:35" },
-        { "sr": 4, "train_no": "64958", "route": "PWL-AGC",      "from": "PWL",  "dep": "04:35", "to": "AGC",  "arr": "07:30", "dep_raw": "PWL-04.35",  "arr_raw": "AGC -07:30" },
-        { "sr": 5, "train_no": "64151", "route": "ALJN-DLI",     "from": "ALJN", "dep": "15:05", "to": "DLI",  "arr": "18:15", "dep_raw": "ALJN-15:05", "arr_raw": "DLI-18:15" },
-        { "sr": 6, "train_no": "64418", "route": "DLI-GZB",      "from": "DLI",  "dep": "18:35", "to": "GZB",  "arr": "19:50", "dep_raw": "DLI-18:35",  "arr_raw": "GZB-19:50" }
+        { "seq": 1,  "train_no": "64417", "from": "GZB",  "dep": "06:35", "dep_day": 1, "to": "DLI",  "arr": "08:00", "arr_day": 1, "dep_tag": "PM",   "in_division": true,  "sheet": { "dep": "06:35", "arr": "07:50" } },
+        { "seq": 2,  "train_no": "64152", "from": "DLI",  "dep": "08:30", "dep_day": 1, "to": "ALJN", "arr": "11:30", "arr_day": 1, "dep_tag": "RBPC", "in_division": true,  "sheet": { "dep": "08:30", "arr": "11:30" } },
+        { "seq": 3,  "train_no": "64154", "from": "ALJN", "dep": "13:30", "dep_day": 1, "to": "TDL",  "arr": "15:00", "arr_day": 1, "dep_tag": "RBPC", "in_division": false },
+        { "seq": 4,  "train_no": "64956", "from": "TDL",  "dep": "15:20", "dep_day": 1, "to": "AGC",  "arr": "17:30", "arr_day": 1, "dep_tag": "RBPC", "in_division": false },
+        { "seq": 5,  "train_no": "64957", "from": "AGC",  "dep": "17:50", "dep_day": 1, "to": "PWL",  "arr": "21:20", "arr_day": 1, "dep_tag": "RBPC", "in_division": true,  "sheet": { "dep": "18:00", "arr": "21:35" } },
+        { "seq": 6,  "train_no": "64958", "from": "PWL",  "dep": "04:25", "dep_day": 2, "to": "AGC",  "arr": "07:25", "arr_day": 2, "dep_tag": "RBPC", "in_division": true,  "sheet": { "dep": "04:35", "arr": "07:30" } },
+        { "seq": 7,  "train_no": "64955", "from": "AGC",  "dep": "08:15", "dep_day": 2, "to": "TDL",  "arr": "09:45", "arr_day": 2, "dep_tag": "RBPC", "in_division": false },
+        { "seq": 8,  "train_no": "64165", "from": "TDL",  "dep": "10:00", "dep_day": 2, "to": "ALJN", "arr": "11:45", "arr_day": 2, "dep_tag": "RBPC", "in_division": false },
+        { "seq": 9,  "train_no": "64151", "from": "ALJN", "dep": "15:00", "dep_day": 2, "to": "DLI",  "arr": "18:15", "arr_day": 2, "dep_tag": "RBPC", "in_division": true,  "sheet": { "dep": "15:05", "arr": "18:15" } },
+        { "seq": 10, "train_no": "64418", "from": "DLI",  "dep": "18:35", "dep_day": 2, "to": "GZB",  "arr": "19:50", "arr_day": 2, "dep_tag": "RBPC", "in_division": true,  "sheet": { "dep": "18:35", "arr": "19:50" } }
       ]
     }
   ]

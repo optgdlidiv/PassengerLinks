@@ -5,24 +5,24 @@
   const el = (tag, attrs = {}, ...kids) => {
     const n = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
       if (k === 'class') n.className = v;
       else if (k === 'style') n.style.cssText = v;
       else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
       else n.setAttribute(k, v);
     }
-    kids.flat().forEach((c) => c != null && n.append(c.nodeType ? c : document.createTextNode(c)));
+    kids.flat().forEach((c) => c != null && c !== false && n.append(c.nodeType ? c : document.createTextNode(c)));
     return n;
   };
-  const rakeColor = (i) => getComputedStyle(document.documentElement).getPropertyValue(`--rake-${i % 6}`).trim();
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  const tag = (t) => (t ? el('span', { class: `tag ${t}` }, t) : null);
 
   const state = {
     data: null, stations: null, paths: null,
-    link: null, services: [], cycles: [],
-    t: 480, playing: false, speed: 30,
-    sel: null,            // {type:'stn', code} | {type:'svc', train}
-    hiddenRakes: new Set(),
-    sort: { k: 'sr', dir: 1 }, q: '',
+    link: null, model: null,
+    t: 0, playing: false, speed: 60,
+    sel: null, // {type:'stn', code} | {type:'svc', train}
   };
 
   /* ---------- load ---------- */
@@ -35,7 +35,7 @@
     state.paths = stns.paths;
     $('#srcNote').textContent = `Source: ${links.source}`;
     const sel = $('#linkSelect');
-    links.links.forEach((l) => sel.append(new Option(l.title, l.no)));
+    links.links.forEach((l) => sel.append(new Option(`${String(l.no).padStart(2, '0')} · ${l.title}`, l.no)));
     sel.addEventListener('change', () => openLink(+sel.value));
     const fromHash = +(location.hash.match(/link-(\d+)/) || [])[1];
     openLink(links.links.some((l) => l.no === fromHash) ? fromHash : links.links[0].no);
@@ -45,161 +45,189 @@
   });
 
   function openLink(no) {
-    const link = state.data.links.find((l) => l.no === no);
-    state.link = link;
-    state.services = M.prepare(link.services);
-    state.cycles = M.buildCycles(state.services);
+    state.link = state.data.links.find((l) => l.no === no);
+    state.model = M.build(state.link);
     state.sel = null;
-    state.hiddenRakes.clear();
     $('#linkSelect').value = no;
     history.replaceState(null, '', `#link-${no}`);
+    $('#timeSlider').max = state.model.cycle - 1;
     renderHead();
-    renderKpis();
+    renderTiles();
+    renderJourney();
     renderMap();
     renderTimeline();
-    renderTable();
+    renderDiffs();
     renderSide();
-    setTime(state.t);
+    setTime(state.model.start);
   }
 
-  /* ---------- heading & check ---------- */
+  const stnName = (c) => (state.stations[c] ? state.stations[c].name : c);
+  const svcAt = (code) => state.model.services.filter((s) => s.from === code || s.to === code);
+  const stnInDiv = (code) => svcAt(code).some((s) => s.in_division);
+
+  /* ---------- heading ---------- */
   function renderHead() {
     const l = state.link;
     $('#linkChips').replaceChildren(
       el('span', { class: 'chip brand' }, `Link ${String(l.no).padStart(2, '0')}`),
       el('span', { class: 'chip' }, `${l.cars} car ${l.stock}`),
-      el('span', { class: 'chip' }, `${l.rakes_as_per_sheet ?? '—'} rake${l.rakes_as_per_sheet > 1 ? 's' : ''} as per sheet`),
+      el('span', { class: 'chip' }, `PM depot: ${l.pm_depot}`),
+      el('span', { class: 'chip' }, `Timings: ${l.timing_source}`),
     );
-    $('#linkTitle').textContent = l.title;
-    $('#linkNote').textContent = l.remarks ? `Remarks: ${l.remarks}` : '';
-
-    const needed = state.cycles.reduce((t, c) => t + (c.days || 1), 0);
-    const open = state.cycles.filter((c) => !c.closed);
-    const ok = !open.length && needed === l.rakes_as_per_sheet;
-    const box = $('#rakeCheck');
-    box.className = 'check ' + (ok ? 'ok' : 'warn');
-    box.replaceChildren(
-      el('span', { class: 'dot' }),
-      el('div', {},
-        el('b', {}, ok ? 'Link closes' : 'Check link'),
-        el('div', { class: 'muted small' },
-          open.length
-            ? `${open.length} chain(s) do not return to start station`
-            : `${needed} rake${needed > 1 ? 's' : ''} needed by timings · ${l.rakes_as_per_sheet} in sheet`),
-      ),
-    );
+    $('#linkTitle').textContent = `${l.cars} car ${l.stock} · ${state.model.route.filter((c, i, a) => a.indexOf(c) === i).join(' · ')}`;
+    $('#linkNote').textContent = l.notes || '';
   }
 
-  /* ---------- KPIs ---------- */
-  function renderKpis() {
-    const svcs = state.services, cyc = state.cycles;
-    const run = svcs.reduce((t, s) => t + s.run, 0);
-    const util = cyc.map((c) => c.runMins / ((c.days || 1) * M.DAY));
-    const avgUtil = util.reduce((a, b) => a + b, 0) / util.length;
-    const stns = new Set(svcs.flatMap((s) => [s.from, s.to]));
-    const longest = cyc.map((c) => c.longestHalt).filter(Boolean).sort((a, b) => b.mins - a.mins)[0];
-    const k = (lbl, val, hint) => el('div', { class: 'kpi' },
-      el('div', { class: 'lbl' }, lbl), el('div', { class: 'val' }, ...[].concat(val)), el('div', { class: 'hint' }, hint));
-    $('#kpis').replaceChildren(
-      k('Services', String(svcs.length), `${new Set(svcs.map((s) => s.train_no)).size} train numbers`),
-      k('Rakes', String(cyc.length), cyc.map((c) => `${c.name}: ${c.services.length} svc`).join(' · ')),
-      k('Running time', [String(Math.floor(run / 60)), el('small', {}, `h ${run % 60}m`)], 'all services, per day'),
-      k('Rake running', [String(Math.round(avgUtil * 100)), el('small', {}, '%')], 'of 24h, average per rake'),
-      k('Terminals', String(stns.size), [...stns].join(' · ')),
-      k('Longest halt', longest ? [M.dur(longest.mins)] : ['—'], longest ? `at ${longest.at}, ${M.fmt(longest.from)}–${M.fmt(longest.to)}` : ''),
-    );
+  /* ---------- tiles ---------- */
+  function renderTiles() {
+    const m = state.model, l = state.link;
+    // route
+    const line = $('#routeLine');
+    line.replaceChildren();
+    m.route.forEach((code, i) => {
+      if (i) {
+        const s = m.services[i - 1];
+        line.append(el('span', { class: 'ar' + (s.in_division ? '' : ' oth'), title: `${s.train_no}` }, '→'));
+      }
+      const isPM = (i === 0 || i === m.route.length - 1) && code === l.pm_station;
+      line.append(el('span', {
+        class: 'st' + (isPM ? ' pm' : stnInDiv(code) ? '' : ' oth'),
+        title: stnName(code) + (isPM ? ' · PM' : ''),
+        onclick: () => select({ type: 'stn', code }),
+      }, code));
+    });
+    $('#routeHint').textContent = `${m.services.length} services over ${m.days} day${m.days > 1 ? 's' : ''} · starts and ends at ${l.pm_station} (PM)`;
+
+    // rakes
+    $('#rakesVal').textContent = String(l.rakes);
+    const rh = $('#rakesHint');
+    if (m.days !== l.rakes) {
+      rh.className = 'hint warn';
+      rh.textContent = `Timings below return to ${l.pm_station} after ${m.days} days; sheet shows ${l.rakes_in_sheet}. Check the full ICMS link.`;
+    } else {
+      rh.className = 'hint';
+      rh.textContent = `${m.days}-day cycle · sheet shows ${l.rakes_in_sheet}`;
+    }
+
+    // longest halt
+    const hs = m.halts.slice().sort((a, b) => b.mins - a.mins);
+    const top = hs[0], next = hs.find((h) => h.at !== top.at);
+    $('#haltVal').replaceChildren(M.dur(top.mins), el('small', {}, `at ${top.at}`));
+    $('#haltHint').textContent = `${M.stamp(top.fromAbs)} → ${top.wraps ? 'next cycle ' : ''}${M.hhmm(top.toAbs)}${top.at === l.pm_station ? ' (PM)' : ''}`
+      + (next ? ` · next: ${next.at} ${M.dur(next.mins)}` : '');
+  }
+
+  /* ---------- journey (day rows) ---------- */
+  function renderJourney() {
+    const m = state.model, box = $('#journey');
+    box.replaceChildren();
+    const longCut = 6 * 60;
+    for (let d = 1; d <= m.days; d++) {
+      const svcs = m.services.filter((s) => s.dep_day === d);
+      if (!svcs.length) continue;
+      const flow = el('div', { class: 'flow' });
+      svcs.forEach((s, i) => {
+        const idx = m.services.indexOf(s);
+        const prev = m.services[idx - 1];
+        if (i === 0) {
+          // opening node of the day
+          const lines = [];
+          if (prev) lines.push(el('div', { class: 't' }, `arr D${prev.arr_day} ${prev.arr}`));
+          lines.push(el('div', { class: 't' }, 'dep ', el('b', {}, s.dep), tag(s.dep_tag)));
+          flow.append(node(s.from, lines, null, !stnInDiv(s.from)));
+        }
+        flow.append(segment(s));
+        const nx = m.services[idx + 1];
+        const h = s.haltAfter;
+        const lines = [el('div', { class: 't' }, 'arr ', el('b', {}, s.arr))];
+        if (nx && nx.dep_day === d) {
+          lines.push(el('div', { class: 't' }, 'dep ', el('b', {}, nx.dep), tag(nx.dep_tag)));
+        } else if (nx) {
+          lines.push(el('div', { class: 't' }, `dep D${nx.dep_day} ${nx.dep}`, tag(nx.dep_tag)));
+        } else {
+          lines.push(el('div', { class: 't' }, `next cycle ${m.services[0].dep}`, tag(m.services[0].dep_tag)));
+        }
+        const haltTxt = el('div', { class: 'halt' + (h.mins >= longCut ? ' long' : '') },
+          `halt ${M.dur(h.mins)}${!nx ? ' · ↺ Day 1' : nx.dep_day !== d ? ` · ↓ Day ${nx.dep_day}` : ''}`);
+        flow.append(node(s.to, lines, haltTxt, !stnInDiv(s.to)));
+      });
+      box.append(el('div', { class: 'day' }, el('div', { class: 'day-lbl' }, 'Day', el('b', {}, String(d))), flow));
+    }
+  }
+  function node(code, lines, halt, oth) {
+    return el('div', { class: 'node' + (oth ? ' oth' : ''), 'data-stn': code, title: stnName(code), onclick: () => select({ type: 'stn', code }) },
+      el('div', { class: 'code' }, code), ...lines, halt);
+  }
+  function segment(s) {
+    return el('div', {
+      class: 'seg' + (s.in_division ? '' : ' oth'), 'data-train': s.train_no,
+      onclick: () => select({ type: 'svc', train: s.train_no }),
+      onmousemove: (e) => tip(e, `<b>${s.train_no}</b> ${s.from} → ${s.to}<br>${s.dep} → ${s.arr} · ${M.dur(s.run)}<br>${s.in_division ? 'Delhi Division' : 'Other division · not in sheet'}`),
+      onmouseleave: hideTip,
+    }, el('div', { class: 'no' }, s.train_no), el('div', { class: 'bar' }), el('div', { class: 'rt' }, M.dur(s.run)));
   }
 
   /* ---------- map ---------- */
-  let map, stnLayer, lineLayer, pinLayer, lines = [], pins = [];
+  let map, lineLayer, stnLayer, pin, lines = [];
   const coord = (c) => [state.stations[c].lat, state.stations[c].lon];
-  const pathOf = (s) => (state.paths[s.route] || [s.from, s.to]).filter((c) => state.stations[c]).map(coord);
+  const pathOf = (s) => (state.paths[`${s.from}-${s.to}`] || [s.from, s.to]).filter((c) => state.stations[c]).map(coord);
 
   function renderMap() {
     if (!map) {
-      map = L.map('map', { zoomControl: true, scrollWheelZoom: false, attributionControl: true });
+      map = L.map('map', { scrollWheelZoom: false });
       L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`, {
-        maxZoom: 18, subdomains: 'abcd',
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        maxZoom: 18, subdomains: 'abcd', attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
       }).addTo(map);
       lineLayer = L.layerGroup().addTo(map);
       stnLayer = L.layerGroup().addTo(map);
-      pinLayer = L.layerGroup().addTo(map);
       map.on('click', () => select(null));
     }
-    lineLayer.clearLayers(); stnLayer.clearLayers(); pinLayer.clearLayers();
-    lines = []; pins = [];
+    lineLayer.clearLayers(); stnLayer.clearLayers(); lines = [];
+    if (pin) { pin.remove(); pin = null; }
 
-    // route lines, one per service
-    state.services.forEach((s) => {
-      const color = rakeColor(s.rake);
+    const divC = css('--div'), othC = css('--oth');
+    state.model.services.forEach((s) => {
       const casing = L.polyline(pathOf(s), { color: dark ? '#0f141b' : '#fff', weight: 9, opacity: .9 }).addTo(lineLayer);
-      const pl = L.polyline(pathOf(s), { color, weight: 5, opacity: .85, lineCap: 'round' }).addTo(lineLayer);
-      pl.bindTooltip(`<b>${s.train_no}</b> ${s.route}<br>${s.dep} → ${s.arr}`, { sticky: true });
+      const pl = L.polyline(pathOf(s), {
+        color: s.in_division ? divC : othC, weight: 5, opacity: .9, lineCap: 'round',
+        dashArray: s.in_division ? null : '8 8',
+      }).addTo(lineLayer);
+      pl.bindTooltip(`<b>${s.train_no}</b> ${s.from} → ${s.to}<br>D${s.dep_day} ${s.dep} → ${s.arr}${s.in_division ? '' : '<br><i>Other division</i>'}`, { sticky: true });
       pl.on('click', (e) => { L.DomEvent.stop(e); select({ type: 'svc', train: s.train_no }); });
       lines.push({ s, pl, casing });
     });
 
-    // stations: terminals of this link big, drawing points small
-    const used = new Set(state.services.flatMap((s) => [s.from, s.to]));
-    const drawn = new Set(state.services.flatMap((s) => state.paths[s.route] || [s.from, s.to]));
+    const used = new Set(state.model.route);
+    const drawn = new Set(state.model.services.flatMap((s) => state.paths[`${s.from}-${s.to}`] || [s.from, s.to]));
     drawn.forEach((code) => {
-      const st = state.stations[code];
-      if (!st) return;
+      if (!state.stations[code]) return;
       const term = used.has(code);
-      const n = state.services.filter((s) => s.from === code || s.to === code).length;
-      const m = L.circleMarker(coord(code), {
-        radius: term ? 7 + Math.min(n, 6) : 3.5,
-        color: dark ? '#e6ebf1' : '#1d3557', weight: 2,
+      const isPM = code === state.link.pm_station;
+      const mk = L.circleMarker(coord(code), {
+        radius: term ? (isPM ? 10 : 8) : 3.5,
+        color: isPM ? css('--pm') : dark ? '#e6ebf1' : '#1d3557', weight: term ? 3 : 1.5,
         fillColor: term ? (dark ? '#171e27' : '#fff') : (dark ? '#97a3b2' : '#9aa5b1'), fillOpacity: 1,
       }).addTo(stnLayer);
-      m.bindTooltip(term ? `${code}` : `${code}`, {
-        permanent: true, direction: 'right', offset: [term ? 10 : 6, 0],
-        className: 'stn-label' + (term ? '' : ' via'),
-      });
-      if (term) {
-        m.on('click', (e) => { L.DomEvent.stop(e); select({ type: 'stn', code }); });
-        m.bindPopup(() => `<b>${st.name}</b> (${code})<br>${n} service${n > 1 ? 's' : ''} start/end here`, { autoPan: false });
-        m.on('mouseover', () => m.openPopup());
-        m.on('mouseout', () => m.closePopup());
-      }
+      mk.bindTooltip(code + (isPM ? ' · PM' : ''), { permanent: true, direction: 'right', offset: [term ? 11 : 6, 0], className: 'stn-label' + (term ? '' : ' via') });
+      if (term) mk.on('click', (e) => { L.DomEvent.stop(e); select({ type: 'stn', code }); });
     });
 
-    // rake pins
-    state.cycles.forEach((c) => {
-      const icon = L.divIcon({
-        className: '', iconSize: [30, 30], iconAnchor: [15, 15],
-        html: `<div class="rake-pin" style="background:${rakeColor(c.id)}">${String.fromCharCode(65 + c.id)}</div>`,
-      });
-      const mk = L.marker(coord(c.services[0].from), { icon, zIndexOffset: 1000 }).addTo(pinLayer);
-      mk.on('click', (e) => {
-        L.DomEvent.stop(e);
-        const p = M.rakeAt(c, state.t);
-        select(p.state === 'run' ? { type: 'svc', train: p.svc.train_no } : { type: 'stn', code: p.at });
-      });
-      pins.push({ c, mk });
+    pin = L.marker(coord(state.model.services[0].from), {
+      icon: L.divIcon({ className: '', iconSize: null, html: '<div class="rake-pin">●</div>' }),
+      zIndexOffset: 1000,
+    }).addTo(map);
+    pin.on('click', (e) => {
+      L.DomEvent.stop(e);
+      const p = M.positionAt(state.model, state.t);
+      select(p.state === 'run' ? { type: 'svc', train: p.svc.train_no } : { type: 'stn', code: p.at });
     });
 
-    const all = [...drawn].filter((c) => state.stations[c]).map(coord);
-    map.fitBounds(all, { padding: [40, 40] });
-
-    // legend
-    $('#rakeLegend').replaceChildren(...state.cycles.map((c) => {
-      const sp = el('span', { title: 'Show / hide' }, el('i', { style: `background:${rakeColor(c.id)}` }),
-        `${c.name} · ${c.services[0].from}${c.closed ? ' ⟲' : ''}`);
-      sp.addEventListener('click', () => {
-        state.hiddenRakes.has(c.id) ? state.hiddenRakes.delete(c.id) : state.hiddenRakes.add(c.id);
-        sp.classList.toggle('off');
-        paintSelection();
-      });
-      return sp;
-    }));
+    map.fitBounds([...drawn].filter((c) => state.stations[c]).map(coord), { padding: [36, 36] });
   }
 
   function pointAlong(latlngs, frac) {
     const pts = latlngs.map((p) => L.latLng(p));
-    const seg = [];
-    let total = 0;
+    const seg = []; let total = 0;
     for (let i = 1; i < pts.length; i++) { const d = pts[i - 1].distanceTo(pts[i]); seg.push(d); total += d; }
     let goal = total * Math.min(Math.max(frac, 0), 1);
     for (let i = 0; i < seg.length; i++) {
@@ -214,33 +242,31 @@
 
   /* ---------- clock ---------- */
   function setTime(t) {
-    state.t = ((t % M.DAY) + M.DAY) % M.DAY;
+    const c = state.model.cycle;
+    state.t = ((t % c) + c) % c;
     $('#timeSlider').value = Math.floor(state.t);
-    $('#timeOut').textContent = M.fmt(state.t);
-    const rows = [];
-    pins.forEach(({ c, mk }) => {
-      const p = M.rakeAt(c, state.t);
-      const hidden = state.hiddenRakes.has(c.id);
-      mk.setOpacity(hidden ? 0 : 1);
-      const node = mk.getElement() && mk.getElement().firstChild;
-      if (p.state === 'run') {
-        mk.setLatLng(pointAlong(pathOf(p.svc), p.frac));
-        node && node.classList.add('running');
-        rows.push(el('div', { class: 'r' }, el('i', { style: `background:${rakeColor(c.id)}` }),
-          el('div', {}, el('b', {}, `${c.name} running ${p.svc.train_no}`),
-            el('div', { class: 'muted' }, `${p.svc.from} → ${p.svc.to} · arr ${p.svc.arr}`))));
-      } else {
-        mk.setLatLng(coord(p.at));
-        node && node.classList.remove('running');
-        const nxt = p.halt ? c.services.find((s) => s.depMin === p.halt.to && s.from === p.at) : null;
-        rows.push(el('div', { class: 'r' }, el('i', { style: `background:${rakeColor(c.id)}` }),
-          el('div', {}, el('b', {}, `${c.name} at ${p.at}`),
-            el('div', { class: 'muted' }, nxt ? `next ${nxt.train_no} at ${nxt.dep}` : 'no further working'))));
-      }
-    });
-    $('#nowBoard').replaceChildren(...rows);
+    $('#timeOut').textContent = M.stamp(state.t);
+    const p = M.positionAt(state.model, state.t);
+    const node = pin && pin.getElement() && pin.getElement().firstChild;
+    let msg;
+    if (p.state === 'run') {
+      pin && pin.setLatLng(pointAlong(pathOf(p.svc), p.frac));
+      if (node) { node.textContent = p.svc.train_no; node.classList.add('running'); }
+      msg = [el('b', {}, `Running ${p.svc.train_no}`), ` ${p.svc.from} → ${p.svc.to}, arrives ${p.svc.arr}`,
+        p.svc.in_division ? '' : el('span', { class: 'muted' }, ' · other division')];
+    } else {
+      pin && pin.setLatLng(coord(p.at));
+      if (node) { node.textContent = p.at; node.classList.remove('running'); }
+      const nx = p.halt.next;
+      msg = [el('b', {}, `At ${stnName(p.at)}`), ` · next ${nx.train_no} dep D${p.halt.wraps ? 1 : nx.dep_day} ${nx.dep}`];
+    }
+    $('#nowBoard').replaceChildren(el('i'), el('span', {}, ...msg));
     const nl = $('#timeline .nowline');
-    if (nl) { const x = tlX(state.t); nl.setAttribute('x1', x); nl.setAttribute('x2', x); }
+    if (nl) {
+      const day = Math.floor(state.t / M.DAY), x = tlX(state.t % M.DAY), y0 = tlRowY(day);
+      nl.setAttribute('x1', x); nl.setAttribute('x2', x);
+      nl.setAttribute('y1', y0 - 4); nl.setAttribute('y2', y0 + 34);
+    }
   }
 
   let last = 0;
@@ -264,200 +290,166 @@
     state.speed = +b.dataset.speed;
   }));
 
-  /* ---------- timeline ---------- */
-  let tlX = () => 0;
+  /* ---------- timeline: one row per day ---------- */
+  let tlX = () => 0, tlRowY = () => 0;
   function renderTimeline() {
-    const box = $('#timeline');
-    const W = Math.max(box.clientWidth, 720), left = 86, right = 16, rowH = 46, top = 26;
-    const H = top + state.cycles.length * rowH + 8;
-    tlX = (m) => left + (m / M.DAY) * (W - left - right);
+    const m = state.model, box = $('#timeline');
+    $('#tlTitle').textContent = `Link timeline · ${m.days} day${m.days > 1 ? 's' : ''}`;
+    const W = Math.max(box.clientWidth, 760), left = 62, right = 16, top = 26, rowH = 58;
+    const H = top + m.days * rowH;
+    tlX = (min) => left + (min / M.DAY) * (W - left - right);
+    tlRowY = (d) => top + d * rowH + 6;
     const NS = 'http://www.w3.org/2000/svg';
-    const s = (tag, a = {}, txt) => { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (txt != null) n.textContent = txt; return n; };
+    const s = (t, a = {}, txt) => { const n = document.createElementNS(NS, t); for (const k in a) n.setAttribute(k, a[k]); if (txt != null) n.textContent = txt; return n; };
     const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', height: H });
     const grid = s('g', { class: 'grid' }), ax = s('g', { class: 'ax' });
     for (let h = 0; h <= 24; h += 2) {
-      const x = tlX(h * 60);
-      grid.append(s('line', { x1: x, x2: x, y1: top - 4, y2: H - 4 }));
-      ax.append(s('text', { x, y: 14, 'text-anchor': 'middle' }, String(h).padStart(2, '0')));
+      grid.append(s('line', { x1: tlX(h * 60), x2: tlX(h * 60), y1: top - 4, y2: H - 6 }));
+      ax.append(s('text', { x: tlX(h * 60), y: 14, 'text-anchor': 'middle' }, String(h).padStart(2, '0')));
     }
+    for (let d = 0; d < m.days; d++) ax.append(s('text', { x: 8, y: tlRowY(d) + 18, class: 'dayt' }, `Day ${d + 1}`));
     svg.append(grid, ax);
 
-    // pieces that may cross midnight
-    const pieces = (from, mins) => {
-      const end = from + mins;
-      return end <= M.DAY ? [[from, end]] : [[from, M.DAY], [0, end - M.DAY]];
+    // split an absolute span into per-day pieces
+    const pieces = (a, b) => {
+      const out = [];
+      let x = a;
+      while (x < b) {
+        const end = Math.min(b, (Math.floor(x / M.DAY) + 1) * M.DAY);
+        out.push([Math.floor(x / M.DAY) % m.days, x % M.DAY, end - Math.floor(x / M.DAY) * M.DAY]);
+        x = end;
+      }
+      return out;
     };
 
-    state.cycles.forEach((c, i) => {
-      const y = top + i * rowH, bh = 26, by = y + 8;
-      const color = rakeColor(c.id);
-      svg.append(s('text', { x: 8, y: by + 17, 'font-weight': 600 }, c.name));
-      c.halts.forEach((h) => {
-        if (!h) return;
-        pieces(h.from, h.mins).forEach(([a, b]) => {
-          const g = s('g', { class: 'halt' });
-          g.append(s('rect', { x: tlX(a), y: by + 8, width: Math.max(0, tlX(b) - tlX(a)), height: 10, rx: 3 }));
-          if (tlX(b) - tlX(a) > 40) g.append(s('text', { x: (tlX(a) + tlX(b)) / 2, y: by + 32, 'text-anchor': 'middle' }, h.at));
-          g.addEventListener('mousemove', (e) => tip(e, `<b>${h.at}</b> halt<br>${M.fmt(h.from)} – ${M.fmt(h.to)} · ${M.dur(h.mins)}`));
-          g.addEventListener('mouseleave', hideTip);
-          g.addEventListener('click', () => select({ type: 'stn', code: h.at }));
-          svg.append(g);
-        });
-      });
-      c.services.forEach((sv) => {
-        pieces(sv.depMin, sv.run).forEach(([a, b]) => {
-          const g = s('g', { class: 'run', 'data-train': sv.train_no });
-          const w = Math.max(2, tlX(b) - tlX(a));
-          g.append(s('rect', { x: tlX(a), y: by, width: w, height: bh, rx: 5, fill: color }));
-          if (w > 44) g.append(s('text', { x: tlX(a) + w / 2, y: by + 17, 'text-anchor': 'middle', fill: '#fff', 'font-weight': 600, style: 'fill:#fff' }, sv.train_no));
-          g.addEventListener('mousemove', (e) => tip(e, `<b>${sv.train_no}</b> ${sv.route}<br>${sv.from} ${sv.dep} → ${sv.to} ${sv.arr}<br>Run ${M.dur(sv.run)}`));
-          g.addEventListener('mouseleave', hideTip);
-          g.addEventListener('click', () => select({ type: 'svc', train: sv.train_no }));
-          svg.append(g);
-        });
-      });
-    });
-    svg.append(s('line', { class: 'nowline', x1: tlX(state.t), x2: tlX(state.t), y1: top - 6, y2: H - 2 }));
+    m.halts.forEach((h) => pieces(h.fromAbs, h.toAbs).forEach(([d, a, b]) => {
+      const g = s('g', { class: 'halt' });
+      const y = tlRowY(d);
+      g.append(s('rect', { x: tlX(a), y: y + 9, width: Math.max(0, tlX(b) - tlX(a)), height: 8, rx: 3 }));
+      if (tlX(b) - tlX(a) > 34) g.append(s('text', { x: (tlX(a) + tlX(b)) / 2, y: y + 32, 'text-anchor': 'middle' }, h.at));
+      g.addEventListener('mousemove', (e) => tip(e, `<b>${h.at}</b> halt ${M.dur(h.mins)}<br>${M.stamp(h.fromAbs)} → ${h.wraps ? 'next cycle ' + M.hhmm(h.toAbs) : M.stamp(h.toAbs)}`));
+      g.addEventListener('mouseleave', hideTip);
+      g.addEventListener('click', (e) => { e.stopPropagation(); select({ type: 'stn', code: h.at }); });
+      svg.append(g);
+    }));
+    m.services.forEach((sv) => pieces(sv.depAbs, sv.arrAbs).forEach(([d, a, b]) => {
+      const g = s('g', { class: 'run', 'data-train': sv.train_no });
+      const y = tlRowY(d), w = Math.max(2, tlX(b) - tlX(a));
+      g.append(s('rect', { class: sv.in_division ? 'div' : 'oth', x: tlX(a), y, width: w, height: 26, rx: 5 }));
+      if (w > 42) g.append(s('text', { x: tlX(a) + w / 2, y: y + 17, 'text-anchor': 'middle', style: 'fill:#fff;font-weight:600' }, sv.train_no));
+      g.addEventListener('mousemove', (e) => tip(e, `<b>${sv.train_no}</b> ${sv.from} → ${sv.to}<br>${sv.dep} → ${sv.arr} · ${M.dur(sv.run)}`));
+      g.addEventListener('mouseleave', hideTip);
+      g.addEventListener('click', (e) => { e.stopPropagation(); select({ type: 'svc', train: sv.train_no }); });
+      svg.append(g);
+    }));
+    svg.append(s('line', { class: 'nowline' }));
     svg.addEventListener('click', (e) => {
-      if (e.target === svg) {
-        const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
-        const p = pt.matrixTransform(svg.getScreenCTM().inverse());
-        if (p.x >= left) setTime(((p.x - left) / (W - left - right)) * M.DAY);
-      }
+      const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      if (p.x < left || p.y < top - 4) return;
+      const d = Math.min(m.days - 1, Math.max(0, Math.floor((p.y - top) / rowH)));
+      setTime(d * M.DAY + ((p.x - left) / (W - left - right)) * M.DAY);
     });
     box.replaceChildren(svg);
   }
   let rT;
-  addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { if (state.link) { renderTimeline(); paintSelection(); } }, 150); });
+  addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { if (state.model) { renderTimeline(); paint(); setTime(state.t); } }, 150); });
 
-  /* ---------- table ---------- */
-  function renderTable() {
-    const tb = $('#svcTable tbody');
-    const q = state.q.trim().toLowerCase();
-    const { k, dir } = state.sort;
-    const val = (s) => ({ sr: s.sr, train_no: s.train_no, route: s.route, dep: s.depMin, arr: s.arrMin, run: s.run, rake: s.rake, next: s.next || '' }[k]);
-    const rows = state.services
-      .filter((s) => !q || [s.train_no, s.route, s.from, s.to].join(' ').toLowerCase().includes(q))
-      .sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * dir);
-    tb.replaceChildren(...rows.map((s) => {
-      const c = state.cycles[s.rake];
-      const tr = el('tr', { 'data-train': s.train_no },
-        el('td', {}, String(s.sr)),
+  /* ---------- sheet vs ICMS ---------- */
+  function renderDiffs() {
+    const rows = state.model.services.filter((s) => s.sheet && (s.sheet.dep !== s.dep || s.sheet.arr !== s.arr));
+    $('#diffCard').hidden = !rows.length;
+    const cell = (a, b) => el('td', { class: 'mono' + (a !== b ? ' diff' : '') }, a);
+    $('#diffTable').replaceChildren(
+      el('thead', {}, el('tr', {}, ...['Train', 'From → To', 'Dep (sheet)', 'Dep (ICMS)', 'Arr (sheet)', 'Arr (ICMS)'].map((h) => el('th', {}, h)))),
+      el('tbody', {}, ...rows.map((s) => el('tr', {},
         el('td', { class: 'mono' }, el('b', {}, s.train_no)),
-        el('td', {}, s.route),
-        el('td', { class: 'mono' }, `${s.from} ${s.dep}`),
-        el('td', { class: 'mono' }, `${s.to} ${s.arr}`, s.overnight ? el('span', { class: 'ovn' }, '+1') : null),
-        el('td', { class: 'mono' }, M.dur(s.run)),
-        el('td', {}, el('span', { class: 'tag', style: `background:${rakeColor(s.rake)}` }, c.name)),
-        el('td', { class: 'mono' }, s.next ? `${s.next} · ${M.dur(s.haltAfter.mins)} at ${s.to}` : '—'),
-      );
-      tr.addEventListener('click', () => select({ type: 'svc', train: s.train_no }));
-      return tr;
-    }));
-    document.querySelectorAll('#svcTable th').forEach((th) => {
-      th.setAttribute('aria-sort', th.dataset.k === k ? (dir > 0 ? 'ascending' : 'descending') : 'none');
-    });
-    paintSelection();
+        el('td', {}, `${s.from} → ${s.to}`),
+        cell(s.sheet.dep, s.dep), el('td', { class: 'mono' }, s.dep),
+        cell(s.sheet.arr, s.arr), el('td', { class: 'mono' }, s.arr)))),
+    );
   }
-  document.querySelectorAll('#svcTable th').forEach((th) => th.addEventListener('click', () => {
-    state.sort = { k: th.dataset.k, dir: state.sort.k === th.dataset.k ? -state.sort.dir : 1 };
-    renderTable();
-  }));
-  $('#search').addEventListener('input', (e) => { state.q = e.target.value; renderTable(); });
 
   /* ---------- side panel ---------- */
   function renderSide() {
-    const body = $('#sideBody');
+    const body = $('#sideBody'), m = state.model;
     $('#clearSel').hidden = !state.sel;
     if (!state.sel) {
-      $('#sideTitle').textContent = 'Rake cycles';
-      body.replaceChildren(...state.cycles.map((c) => chainView(c, null)));
+      $('#sideTitle').textContent = 'Station board';
+      const codes = m.route.filter((c, i, a) => a.indexOf(c) === i);
+      body.replaceChildren(
+        el('p', { class: 'muted small', style: 'margin:0' }, 'Pick a station to see its arrivals and departures in this link.'),
+        el('div', { class: 'stn-pick' }, ...codes.map((c) => el('button', { class: 'chip-btn', onclick: () => select({ type: 'stn', code: c }) }, c))),
+      );
       return;
     }
     if (state.sel.type === 'stn') {
-      const code = state.sel.code, st = state.stations[code];
-      $('#sideTitle').textContent = `${st ? st.name : code} (${code})`;
-      const arr = state.services.filter((s) => s.to === code).sort((a, b) => a.arrMin - b.arrMin);
-      const dep = state.services.filter((s) => s.from === code).sort((a, b) => a.depMin - b.depMin);
-      const row = (s, t, other) => {
-        const r = el('div', { class: 'row' }, el('span', { class: 'mono t' }, t),
-          el('span', {}, el('b', { class: 'mono' }, s.train_no), ' ', el('span', { class: 'muted' }, other)),
-          el('span', { class: 'tag', style: `background:${rakeColor(s.rake)}` }, state.cycles[s.rake].name));
-        r.addEventListener('click', () => select({ type: 'svc', train: s.train_no }));
-        return r;
-      };
+      const code = state.sel.code;
+      $('#sideTitle').textContent = `${stnName(code)} (${code})`;
+      const arr = m.services.filter((s) => s.to === code).sort((a, b) => a.arrAbs - b.arrAbs);
+      const dep = m.services.filter((s) => s.from === code).sort((a, b) => a.depAbs - b.depAbs);
+      const row = (s, when, other, t) => el('div', { class: 'row' + (s.in_division ? '' : ' oth'), onclick: () => select({ type: 'svc', train: s.train_no }) },
+        el('span', { class: 'mono' }, when),
+        el('span', {}, el('b', { class: 'mono' }, s.train_no), ' ', el('span', { class: 'muted' }, other), tag(t)));
+      const halts = m.halts.filter((h) => h.at === code);
       body.replaceChildren(el('div', { class: 'board' },
-        el('h4', {}, `Arrivals (${arr.length})`), ...(arr.length ? arr.map((s) => row(s, s.arr, `from ${s.from}`)) : [el('p', { class: 'muted small' }, 'None')]),
-        el('h4', {}, `Departures (${dep.length})`), ...(dep.length ? dep.map((s) => row(s, s.dep, `to ${s.to}`)) : [el('p', { class: 'muted small' }, 'None')]),
+        el('h4', {}, `Arrivals (${arr.length})`), ...(arr.length ? arr.map((s) => row(s, `D${s.arr_day} ${s.arr}`, `from ${s.from}`)) : [el('p', { class: 'muted small' }, 'None')]),
+        el('h4', {}, `Departures (${dep.length})`), ...(dep.length ? dep.map((s) => row(s, `D${s.dep_day} ${s.dep}`, `to ${s.to}`, s.dep_tag)) : [el('p', { class: 'muted small' }, 'None')]),
+        halts.length ? el('h4', {}, 'Halts') : null,
+        ...halts.map((h) => el('div', { class: 'small', style: 'padding:2px 8px' }, `${M.dur(h.mins)} · ${M.stamp(h.fromAbs)} → ${h.wraps ? 'next cycle ' + M.hhmm(h.toAbs) : M.stamp(h.toAbs)}`)),
       ));
       return;
     }
-    const s = state.services.find((x) => x.train_no === state.sel.train);
-    const c = state.cycles[s.rake];
+    const s = m.services.find((x) => x.train_no === state.sel.train);
+    const idx = m.services.indexOf(s);
+    const prev = m.services[idx - 1] || m.services[m.services.length - 1];
     $('#sideTitle').textContent = `Train ${s.train_no}`;
+    const sheetCell = (a, b) => (a === b ? el('span', { class: 'mono' }, a) : el('span', { class: 'mono diff' }, `${a} (ICMS ${b})`));
     body.replaceChildren(el('div', { class: 'svc-detail' },
-      el('div', { class: 'big' }, s.route),
+      el('div', { class: 'big' }, `${s.from} → ${s.to}`),
+      el('div', { style: 'margin-top:4px' }, el('span', { class: 'pill ' + (s.in_division ? 'div' : 'oth') }, s.in_division ? 'Delhi Division' : 'Other division · not in sheet')),
       el('dl', {},
-        el('dt', {}, 'Departs'), el('dd', { class: 'mono' }, `${s.from} ${s.dep}`),
-        el('dt', {}, 'Arrives'), el('dd', { class: 'mono' }, `${s.to} ${s.arr}${s.overnight ? ' (+1)' : ''}`),
+        el('dt', {}, 'Departs'), el('dd', { class: 'mono' }, `${s.from} D${s.dep_day} ${s.dep}`, tag(s.dep_tag)),
+        el('dt', {}, 'Arrives'), el('dd', { class: 'mono' }, `${s.to} D${s.arr_day} ${s.arr}`),
         el('dt', {}, 'Run time'), el('dd', {}, M.dur(s.run)),
-        el('dt', {}, 'Rake'), el('dd', {}, c.name),
-        el('dt', {}, 'In sheet'), el('dd', { class: 'mono' }, `${s.dep_raw} → ${s.arr_raw}`),
+        el('dt', {}, 'Comes from'), el('dd', {}, `${prev.train_no} · halt ${M.dur(prev.haltAfter.mins)} at ${s.from}`),
+        el('dt', {}, 'Next working'), el('dd', {}, `${s.haltAfter.next.train_no} · halt ${M.dur(s.haltAfter.mins)} at ${s.to}`),
+        s.sheet ? el('dt', {}, 'Sheet dep') : null, s.sheet ? el('dd', {}, sheetCell(s.sheet.dep, s.dep)) : null,
+        s.sheet ? el('dt', {}, 'Sheet arr') : null, s.sheet ? el('dd', {}, sheetCell(s.sheet.arr, s.arr)) : null,
       ),
-    ), chainView(c, s.train_no));
-  }
-
-  function chainView(c, cur) {
-    const color = rakeColor(c.id);
-    const wrap = el('div', { class: 'chain', style: `color:${color}` });
-    wrap.append(el('div', { style: 'color:var(--ink);font-weight:600;margin-bottom:6px' },
-      `${c.name} · ${c.services.length} services · running ${M.dur(c.runMins)}`));
-    c.services.forEach((s, i) => {
-      const h = c.halts[i];
-      const step = el('div', { class: 'step' + (s.train_no === cur ? ' cur' : '') },
-        el('div', { class: 'rail' }, el('b'), el('s')),
-        el('div', { class: 'txt', style: 'color:var(--ink);cursor:pointer' },
-          el('b', { class: 'mono' }, s.train_no), ` ${s.from} ${s.dep} → ${s.to} ${s.arr}`,
-          h ? el('div', { class: 'muted small' }, `halt ${M.dur(h.mins)} at ${h.at}`) : null));
-      step.querySelector('.txt').addEventListener('click', () => select({ type: 'svc', train: s.train_no }));
-      wrap.append(step);
-    });
-    if (c.closed) wrap.append(el('div', { class: 'muted small', style: 'color:var(--muted)' }, `⟲ back to ${c.services[0].from}, cycle repeats`));
-    return wrap;
+    ));
   }
 
   /* ---------- selection ---------- */
   function select(sel) {
     state.sel = sel;
     renderSide();
-    paintSelection();
+    paint();
     if (sel && sel.type === 'svc') {
       const ln = lines.find((l) => l.s.train_no === sel.train);
       ln && map.fitBounds(ln.pl.getBounds(), { padding: [60, 60], maxZoom: 10 });
+      const s = state.model.services.find((x) => x.train_no === sel.train);
+      if (s && !state.playing) setTime(s.depAbs);
     }
   }
   $('#clearSel').addEventListener('click', () => select(null));
 
-  function paintSelection() {
+  function paint() {
     const sel = state.sel;
     const hit = (s) => !sel || (sel.type === 'svc' ? s.train_no === sel.train : s.from === sel.code || s.to === sel.code);
     lines.forEach(({ s, pl, casing }) => {
-      const hidden = state.hiddenRakes.has(s.rake);
       const on = hit(s);
-      pl.setStyle({ opacity: hidden ? 0 : on ? .95 : .15, weight: sel && on ? 7 : 5 });
-      casing.setStyle({ opacity: hidden ? 0 : on ? .9 : .2 });
+      pl.setStyle({ opacity: on ? .95 : .15, weight: sel && on ? 7 : 5 });
+      casing.setStyle({ opacity: on ? .9 : .15 });
       if (on && sel) pl.bringToFront();
     });
-    document.querySelectorAll('#svcTable tbody tr').forEach((tr) => {
-      const s = state.services.find((x) => x.train_no === tr.dataset.train);
-      tr.classList.toggle('sel', !!sel && hit(s));
-    });
+    document.querySelectorAll('.seg').forEach((n) => n.classList.toggle('sel', !!sel && sel.type === 'svc' && n.dataset.train === sel.train));
+    document.querySelectorAll('.node').forEach((n) => n.classList.toggle('sel', !!sel && sel.type === 'stn' && n.dataset.stn === sel.code));
     document.querySelectorAll('#timeline .run').forEach((g) => {
-      const s = state.services.find((x) => x.train_no === g.dataset.train);
+      const s = state.model.services.find((x) => x.train_no === g.dataset.train);
       g.classList.toggle('sel', !!sel && sel.type === 'svc' && hit(s));
-      g.style.opacity = state.hiddenRakes.has(s.rake) ? .15 : !sel || hit(s) ? 1 : .35;
+      g.style.opacity = !sel || hit(s) ? 1 : .3;
     });
-    pins.forEach(({ c, mk }) => mk.setOpacity(state.hiddenRakes.has(c.id) ? 0 : 1));
   }
 
   /* ---------- tooltip ---------- */
