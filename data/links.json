@@ -755,6 +755,150 @@
      }
     }
    ]
+  },
+  {
+   "no": 5,
+   "name": "DLI-PNP-TDL-HRF-GZB",
+   "sheet_title": "6. 12 CAR MEMU (11 RAKE)",
+   "stock": "MEMU",
+   "cars": 12,
+   "rakes": 3,
+   "rakes_in_sheet": 11,
+   "rakes_note": "please confirm",
+   "pm_depot": null,
+   "pm_station": null,
+   "timing_source": "Sheet (ICMS link not added)",
+   "notes": "Timings from the sheet. The link ends at GZB but starts at DLI; the sheet shows no empty rake move GZB \u2192 DLI, so it is shown as an empty rake without timing.",
+   "services": [
+    {
+     "seq": 1,
+     "train_no": "64531",
+     "from": "DLI",
+     "dep": "04:55",
+     "dep_day": 1,
+     "to": "PNP",
+     "arr": "07:53",
+     "arr_day": 1,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "04:55",
+      "arr": "07:53"
+     }
+    },
+    {
+     "seq": 2,
+     "train_no": "64536",
+     "from": "PNP",
+     "dep": "10:20",
+     "dep_day": 1,
+     "to": "DLI",
+     "arr": "13:05",
+     "arr_day": 1,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "10:20",
+      "arr": "13:05"
+     }
+    },
+    {
+     "seq": 3,
+     "train_no": "64584",
+     "from": "DLI",
+     "dep": "13:25",
+     "dep_day": 1,
+     "to": "TDL",
+     "arr": "18:15",
+     "arr_day": 1,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "13:25",
+      "arr": "18:15"
+     }
+    },
+    {
+     "seq": 4,
+     "train_no": "64583",
+     "from": "TDL",
+     "dep": "06:15",
+     "dep_day": 2,
+     "to": "DLI",
+     "arr": "12:30",
+     "arr_day": 2,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "06:15",
+      "arr": "12:30"
+     }
+    },
+    {
+     "seq": 5,
+     "train_no": "64582",
+     "from": "DLI",
+     "dep": "17:55",
+     "dep_day": 2,
+     "to": "HRF",
+     "arr": "22:00",
+     "arr_day": 2,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "17:55",
+      "arr": "22:00"
+     }
+    },
+    {
+     "seq": 6,
+     "train_no": "64581",
+     "from": "HRF",
+     "dep": "05:50",
+     "dep_day": 3,
+     "to": "DLI",
+     "arr": "10:00",
+     "arr_day": 3,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "05:50",
+      "arr": "10:00"
+     }
+    },
+    {
+     "seq": 7,
+     "train_no": "64533",
+     "from": "DLI",
+     "dep": "12:00",
+     "dep_day": 3,
+     "to": "PNP",
+     "arr": "14:15",
+     "arr_day": 3,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "12:00",
+      "arr": "14:15"
+     }
+    },
+    {
+     "seq": 8,
+     "train_no": "64534",
+     "from": "PNP",
+     "dep": "17:30",
+     "dep_day": 3,
+     "to": "GZB",
+     "arr": "20:40",
+     "arr_day": 3,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "17:30",
+      "arr": "20:40"
+     }
+    }
+   ]
   }
  ]
 }

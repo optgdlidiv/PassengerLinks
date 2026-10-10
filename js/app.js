@@ -139,7 +139,7 @@
       }, code));
     });
     const base = m.services[0].from;
-    $('#routeHint').textContent = `${m.services.length} services over ${m.days} day${m.days > 1 ? 's' : ''} · starts and ends at ${base}${base === l.pm_station ? ' (PM)' : ''}`;
+    $('#routeHint').textContent = `${m.services.length} services over ${m.days} day${m.days > 1 ? 's' : ''} · ${m.closed ? `starts and ends at ${base}${base === l.pm_station ? ' (PM)' : ''}` : `starts at ${base}, ends at ${m.services[m.services.length - 1].to}`}`;
 
     // rakes
     $('#rakesVal').textContent = String(l.rakes);
