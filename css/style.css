@@ -39,6 +39,14 @@ h3{font-size:16px;font-weight:600}
 .brand .sub{margin:0;font-size:12px;opacity:.75}
 .logo svg{width:34px;height:34px;fill:#fff;stroke:#fff;stroke-width:2;stroke-linecap:round}
 .logo .win{fill:#1d3557;stroke:none}
+.controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.search-box{position:relative;display:flex;align-items:center}
+.search-box svg{position:absolute;left:10px;width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2;opacity:.75;pointer-events:none}
+.search-box input{font:500 14px "JetBrains Mono",monospace;width:190px;padding:8px 10px 8px 32px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff}
+.search-box input::placeholder{color:rgba(255,255,255,.7);font-family:Inter,sans-serif}
+.search-box input:focus{outline:none;background:rgba(255,255,255,.2);border-color:#fff}
+.search-msg{position:absolute;top:calc(100% + 6px);right:0;white-space:nowrap;background:#fff;color:#16202c;font-size:12.5px;padding:6px 10px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+@media (max-width:700px){.topbar{flex-wrap:wrap}.controls{width:100%;justify-content:space-between}.search-box input{width:150px}}
 .select{display:flex;align-items:center;gap:8px;font-size:13px}
 .select select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;max-width:60vw}
 .select option{color:#111}
@@ -83,7 +91,7 @@ h3{font-size:16px;font-weight:600}
 .day{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;align-items:start}
 .day-lbl{font:700 13px Inter,sans-serif;color:var(--muted);padding-top:22px;text-align:center}
 .day-lbl b{display:block;font-size:22px;color:var(--ink);line-height:1}
-.flow{display:flex;align-items:stretch;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;row-gap:10px;padding:4px 2px}
 .node{flex:none;min-width:88px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;gap:2px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
 .node:hover,.node.sel{border-color:var(--brand);box-shadow:0 0 0 2px color-mix(in srgb,var(--brand) 20%,transparent)}
 .node.oth{background:color-mix(in srgb,var(--oth) 8%,var(--panel))}
@@ -94,7 +102,7 @@ h3{font-size:16px;font-weight:600}
 .node .halt.long{color:var(--warn);font-weight:600}
 .tag{display:inline-block;font:700 10px Inter,sans-serif;letter-spacing:.03em;padding:1px 6px;border-radius:4px;color:#fff;vertical-align:1px;margin-left:4px}
 .tag.PM{background:var(--pm)} .tag.RBPC{background:var(--rbpc)}
-.seg{flex:1 1 52px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 4px;cursor:pointer;min-width:52px}
+.seg{flex:1 1 52px;max-width:150px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 4px;cursor:pointer;min-width:52px}
 .seg .no{font:700 13px "JetBrains Mono",monospace;color:var(--div)}
 .seg.oth .no{color:var(--muted)}
 .seg .bar{position:relative;width:100%;height:4px;border-radius:2px;background:var(--div);margin:4px 0}

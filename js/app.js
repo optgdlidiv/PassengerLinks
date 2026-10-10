@@ -35,8 +35,9 @@
     state.paths = stns.paths;
     $('#srcNote').textContent = `Source: ${links.source}`;
     const sel = $('#linkSelect');
-    links.links.forEach((l) => sel.append(new Option(`${String(l.no).padStart(2, '0')} · ${l.title}`, l.no)));
+    links.links.forEach((l) => sel.append(new Option(`${String(l.no).padStart(2, '0')} · ${l.name}`, l.no)));
     sel.addEventListener('change', () => openLink(+sel.value));
+    setupSearch();
     const fromHash = +(location.hash.match(/link-(\d+)/) || [])[1];
     openLink(links.links.some((l) => l.no === fromHash) ? fromHash : links.links[0].no);
   }).catch((e) => {
@@ -44,7 +45,36 @@
     $('#linkNote').textContent = 'Open this page from a web server (GitHub Pages), not as a local file. ' + e.message;
   });
 
-  function openLink(no) {
+  /* ---------- train search ---------- */
+  function setupSearch() {
+    const input = $('#trainSearch'), list = $('#trainList'), msg = $('#searchMsg');
+    const index = [];
+    state.data.links.forEach((l) => l.services.forEach((s) => index.push({ train: s.train_no, link: l, s })));
+    list.replaceChildren(...index.map((r) => el('option', { value: r.train }, `${r.s.from}-${r.s.to} · Link ${String(r.link.no).padStart(2, '0')} ${r.link.name}`)));
+    const go = () => {
+      const q = input.value.replace(/\D/g, '');
+      if (!q) { msg.hidden = true; return; }
+      const exact = index.find((r) => r.train === q);
+      const hits = exact ? [exact] : index.filter((r) => r.train.startsWith(q));
+      const links = [...new Set(hits.map((r) => r.link.no))];
+      if (hits.length && links.length === 1 && (exact || hits.length === 1)) {
+        msg.hidden = true;
+        openLink(hits[0].link.no, hits[0].train);
+        input.blur();
+      } else if (hits.length) {
+        msg.hidden = false;
+        msg.textContent = `${hits.length} trains match — keep typing`;
+      } else {
+        msg.hidden = false;
+        msg.textContent = `Train ${q} not found in any link`;
+      }
+    };
+    input.addEventListener('change', go);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+    input.addEventListener('input', () => { if (/^\d{5}$/.test(input.value.trim())) go(); else msg.hidden = true; });
+  }
+
+  function openLink(no, train) {
     state.link = state.data.links.find((l) => l.no === no);
     state.model = M.build(state.link);
     state.sel = null;
@@ -59,6 +89,11 @@
     renderDiffs();
     renderSide();
     setTime(state.model.start);
+    if (train) {
+      select({ type: 'svc', train });
+      const seg = document.querySelector(`.seg[data-train="${train}"]`);
+      seg && seg.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
   }
 
   const stnName = (c) => (state.stations[c] ? state.stations[c].name : c);
@@ -74,7 +109,7 @@
       el('span', { class: 'chip' }, `PM depot: ${l.pm_depot}`),
       el('span', { class: 'chip' }, `Timings: ${l.timing_source}`),
     );
-    $('#linkTitle').textContent = `${l.cars} car ${l.stock} · ${state.model.route.filter((c, i, a) => a.indexOf(c) === i).join(' · ')}`;
+    $('#linkTitle').textContent = l.name;
     $('#linkNote').textContent = l.notes || '';
   }
 
@@ -122,7 +157,8 @@
     const m = state.model, box = $('#journey');
     box.replaceChildren();
     const longCut = 6 * 60;
-    for (let d = 1; d <= m.days; d++) {
+    const lastDay = Math.max(...m.services.map((x) => x.dep_day));
+    for (let d = 1; d <= lastDay; d++) {
       const svcs = m.services.filter((s) => s.dep_day === d);
       if (!svcs.length) continue;
       const flow = el('div', { class: 'flow' });

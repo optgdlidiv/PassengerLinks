@@ -21,10 +21,18 @@
         <p class="sub">Delhi Division · Northern Railway</p>
       </div>
     </div>
-    <label class="select">
-      <span>Link</span>
-      <select id="linkSelect" aria-label="Select rake link"></select>
-    </label>
+    <div class="controls">
+      <div class="search-box">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+        <input id="trainSearch" type="search" inputmode="numeric" list="trainList" placeholder="Search train no." aria-label="Search train number" autocomplete="off">
+        <datalist id="trainList"></datalist>
+        <div id="searchMsg" class="search-msg" hidden></div>
+      </div>
+      <label class="select">
+        <span>Link</span>
+        <select id="linkSelect" aria-label="Select rake link"></select>
+      </label>
+    </div>
   </header>
 
   <main class="wrap">
