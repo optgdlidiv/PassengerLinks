@@ -113,6 +113,23 @@
    "name": "Hathras",
    "lat": 27.596,
    "lon": 78.048
+  },
+  "SRE": {
+   "name": "Saharanpur",
+   "lat": 29.964,
+   "lon": 77.546
+  },
+  "SMQL": {
+   "name": "Shamli",
+   "lat": 29.45,
+   "lon": 77.31,
+   "via_only": true
+  },
+  "MTC": {
+   "name": "Meerut City",
+   "lat": 28.9845,
+   "lon": 77.7064,
+   "via_only": true
   }
  },
  "paths": {
@@ -316,6 +333,14 @@
    "KRJ",
    "GZB",
    "DLI"
+  ],
+  "SRE-UMB": [
+   "SRE",
+   "UMB"
+  ],
+  "UMB-SRE": [
+   "UMB",
+   "SRE"
   ]
  }
 }

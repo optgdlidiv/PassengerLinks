@@ -128,7 +128,7 @@
     line.replaceChildren();
     m.route.forEach(({ code, svc, ecr }, i) => {
       if (i) {
-        if (ecr) line.append(el('span', { class: 'ar ecr', title: 'Empty rake' }, '⇢'));
+        if (ecr) line.append(el('span', { class: 'ar ecr', title: ecr.label || 'Empty rake' }, '⇢'));
         else line.append(el('span', { class: 'ar' + (svc.in_division ? '' : ' oth'), title: `${svc.train_no}` }, '→'));
       }
       const isPM = (i === 0 || i === m.route.length - 1) && code === l.pm_station;
@@ -170,13 +170,13 @@
         const idx = m.services.indexOf(s);
         const prev = m.services[idx - 1];
         if (i === 0 && prev && prev.haltAfter.ecr) {
-          flow.append(el('div', { class: 'seg ecr', title: prev.haltAfter.ecr.note || 'Empty rake' },
-            el('div', { class: 'no' }, 'Empty'), el('div', { class: 'bar' }), el('div', { class: 'rt' }, `${prev.to} → ${s.from}`)));
+          flow.append(el('div', { class: 'seg ecr', title: prev.haltAfter.ecr.note || prev.haltAfter.ecr.label },
+            el('div', { class: 'no' }, prev.haltAfter.ecr.label), el('div', { class: 'bar' }), el('div', { class: 'rt' }, `${prev.to} → ${s.from}`)));
         }
         if (i === 0) {
           // opening node of the day
           const lines = [];
-          if (prev && prev.haltAfter.ecr) lines.push(el('div', { class: 't ecr-t' }, `empty rake ex ${prev.to}`));
+          if (prev && prev.haltAfter.ecr) lines.push(el('div', { class: 't ecr-t' }, `${prev.haltAfter.ecr.label} ex ${prev.to}`));
           else if (prev) lines.push(el('div', { class: 't' }, `arr D${prev.arr_day} ${prev.arr}`));
           lines.push(el('div', { class: 't' }, 'dep ', el('b', {}, s.dep), tag(s.dep_tag)));
           flow.append(node(s.from, lines, null, !stnInDiv(s.from)));
@@ -186,7 +186,7 @@
         const h = s.haltAfter;
         const lines = [el('div', { class: 't' }, 'arr ', el('b', {}, s.arr), tag(s.arr_tag))];
         if (h.ecr) {
-          lines.push(el('div', { class: 't ecr-t' }, `empty rake to ${h.ecr.to}`));
+          lines.push(el('div', { class: 't ecr-t' }, `${h.ecr.label} to ${h.ecr.to}`));
         } else if (nx && nx.dep_day === d) {
           lines.push(el('div', { class: 't' }, 'dep ', el('b', {}, nx.dep), tag(nx.dep_tag)));
         } else if (nx) {
@@ -200,8 +200,8 @@
             `halt ${M.dur(h.mins)}${!nx ? ' · ↺ Day 1' : nx.dep_day !== d ? ` · ↓ Day ${nx.dep_day}` : ''}`);
         flow.append(node(s.to, lines, haltTxt, !stnInDiv(s.to)));
         if (h.ecr && nx && nx.dep_day === d) {
-          flow.append(el('div', { class: 'seg ecr', title: h.ecr.note || 'Empty rake' },
-            el('div', { class: 'no' }, 'Empty'), el('div', { class: 'bar' }), el('div', { class: 'rt' }, `${h.ecr.from} → ${h.ecr.to}`)));
+          flow.append(el('div', { class: 'seg ecr', title: h.ecr.note || h.ecr.label },
+            el('div', { class: 'no' }, h.ecr.label), el('div', { class: 'bar' }), el('div', { class: 'rt' }, `${h.ecr.from} → ${h.ecr.to}`)));
           flow.append(node(h.ecr.to, [el('div', { class: 't' }, 'dep ', el('b', {}, nx.dep), tag(nx.dep_tag))], null, false));
         }
       });
@@ -224,7 +224,8 @@
   /* ---------- map ---------- */
   let map, lineLayer, stnLayer, pin, lines = [];
   const coord = (c) => [state.stations[c].lat, state.stations[c].lon];
-  const pathOf = (s) => (state.paths[`${s.from}-${s.to}`] || [s.from, s.to]).filter((c) => state.stations[c]).map(coord);
+  const pathCodes = (s) => s.path || state.paths[`${s.from}-${s.to}`] || [s.from, s.to];
+  const pathOf = (s) => pathCodes(s).filter((c) => state.stations[c]).map(coord);
 
   function renderMap() {
     if (!map) {
@@ -255,11 +256,11 @@
     state.model.halts.filter((h) => h.ecr).forEach((h) => {
       const pts = (state.paths[`${h.ecr.from}-${h.ecr.to}`] || [h.ecr.from, h.ecr.to]).filter((c) => state.stations[c]).map(coord);
       L.polyline(pts, { color: css('--ecr'), weight: 4, opacity: .95, dashArray: '2 8', lineCap: 'round' })
-        .bindTooltip(`<b>Empty rake</b> ${h.ecr.from} → ${h.ecr.to}${h.ecr.note ? '<br>' + h.ecr.note : ''}`, { sticky: true })
+        .bindTooltip(`<b>${h.ecr.label}</b> ${h.ecr.from} → ${h.ecr.to}${h.ecr.note ? '<br>' + h.ecr.note : ''}`, { sticky: true })
         .addTo(lineLayer);
     });
     const used = new Set(state.model.route.map((r) => r.code));
-    const drawn = new Set(state.model.services.flatMap((s) => state.paths[`${s.from}-${s.to}`] || [s.from, s.to]));
+    const drawn = new Set(state.model.services.flatMap((s) => pathCodes(s)));
     drawn.forEach((code) => {
       if (!state.stations[code]) return;
       const term = used.has(code);
@@ -320,7 +321,7 @@
       if (node) { node.textContent = p.at; node.classList.remove('running'); }
       const nx = p.halt.next;
       msg = p.halt.ecr
-        ? [el('b', {}, `Empty rake ${p.halt.ecr.from} → ${p.halt.ecr.to}`), ` · arr ${p.halt.ecr.from} ${M.hhmm(p.halt.fromAbs)}, next ${nx.train_no} dep ${nx.from} D${nx.dep_day} ${nx.dep}`]
+        ? [el('b', {}, `${p.halt.ecr.label} ${p.halt.ecr.from} → ${p.halt.ecr.to}`), ` · arr ${p.halt.ecr.from} ${M.hhmm(p.halt.fromAbs)}, next ${nx.train_no} dep ${nx.from} D${nx.dep_day} ${nx.dep}`]
         : [el('b', {}, `At ${stnName(p.at)}`), ` · next ${nx.train_no} dep D${p.halt.wraps ? 1 : nx.dep_day} ${nx.dep}`];
     }
     $('#nowBoard').replaceChildren(el('i'), el('span', {}, ...msg));
@@ -389,7 +390,7 @@
       const g = s('g', { class: 'halt' });
       const y = tlRowY(d);
       g.append(s('rect', { x: tlX(a), y: y + 9, width: Math.max(0, tlX(b) - tlX(a)), height: 8, rx: 3 }));
-      if (tlX(b) - tlX(a) > 34) g.append(s('text', { x: (tlX(a) + tlX(b)) / 2, y: y + 32, 'text-anchor': 'middle' }, h.ecr ? `ECR ${h.ecr.from}→${h.ecr.to}` : h.at));
+      if (tlX(b) - tlX(a) > 34) g.append(s('text', { x: (tlX(a) + tlX(b)) / 2, y: y + 32, 'text-anchor': 'middle' }, h.ecr ? `${h.ecr.label === 'Empty rake' ? 'ECR' : h.ecr.label} ${h.ecr.from}→${h.ecr.to}` : h.at));
       g.addEventListener('mousemove', (e) => tip(e, `<b>${h.at}</b> halt ${M.dur(h.mins)}<br>${M.stamp(h.fromAbs)} → ${h.wraps ? 'next cycle ' + M.hhmm(h.toAbs) : M.stamp(h.toAbs)}`));
       g.addEventListener('mouseleave', hideTip);
       g.addEventListener('click', (e) => { e.stopPropagation(); select({ type: 'stn', code: h.at }); });

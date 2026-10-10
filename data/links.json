@@ -899,6 +899,160 @@
      }
     }
    ]
+  },
+  {
+   "no": 6,
+   "name": "SRE-DLI-UMB-PNP",
+   "sheet_title": "7, 8 & 20. 12 CAR MEMU (SRE SHED)",
+   "stock": "MEMU",
+   "cars": 12,
+   "rakes": 4,
+   "rakes_in_sheet": 4,
+   "rakes_note": "sheet: 01 + 01 + 02 across links 7, 8, 20",
+   "pm_depot": "SRE",
+   "pm_station": "SRE",
+   "timing_source": "ICMS rake link",
+   "notes": "One ICMS link covers sheet links 7, 8 and 20. Only trains listed in the sheet are shown; between UMB (Day 4) and PM at SRE the rake works services not in the sheet.",
+   "services": [
+    {
+     "seq": 1,
+     "train_no": "64558",
+     "from": "SRE",
+     "dep": "04:20",
+     "dep_day": 1,
+     "to": "DLI",
+     "arr": "08:45",
+     "arr_day": 1,
+     "dep_tag": "PM",
+     "in_division": true,
+     "sheet": {
+      "dep": "04:20",
+      "arr": "08:45"
+     },
+     "path": [
+      "SRE",
+      "SMQL",
+      "DLI"
+     ]
+    },
+    {
+     "seq": 2,
+     "train_no": "64557",
+     "from": "DLI",
+     "dep": "16:15",
+     "dep_day": 1,
+     "to": "SRE",
+     "arr": "20:50",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "16:15",
+      "arr": "20:50"
+     },
+     "path": [
+      "DLI",
+      "SMQL",
+      "SRE"
+     ]
+    },
+    {
+     "seq": 3,
+     "train_no": "64560",
+     "from": "SRE",
+     "dep": "05:10",
+     "dep_day": 2,
+     "to": "DLI",
+     "arr": "09:35",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "05:20",
+      "arr": "09:35"
+     },
+     "path": [
+      "SRE",
+      "MTC",
+      "DLI"
+     ]
+    },
+    {
+     "seq": 4,
+     "train_no": "64559",
+     "from": "DLI",
+     "dep": "13:35",
+     "dep_day": 2,
+     "to": "SRE",
+     "arr": "19:00",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "13:35",
+      "arr": "19:00"
+     },
+     "path": [
+      "DLI",
+      "MTC",
+      "SRE"
+     ],
+     "ecr_after": {
+      "from": "SRE",
+      "to": "UMB",
+      "label": "Empty rake",
+      "note": "Empty rake SRE \u2192 UMB to work 64532"
+     }
+    },
+    {
+     "seq": 5,
+     "train_no": "64532",
+     "from": "UMB",
+     "dep": "06:58",
+     "dep_day": 3,
+     "to": "PNP",
+     "arr": "09:50",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "06:58",
+      "arr": "09:50"
+     },
+     "path": [
+      "UMB",
+      "KKDE",
+      "PNP"
+     ]
+    },
+    {
+     "seq": 6,
+     "train_no": "64541",
+     "from": "PNP",
+     "dep": "06:05",
+     "dep_day": 4,
+     "to": "UMB",
+     "arr": "09:20",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "06:05",
+      "arr": "09:20"
+     },
+     "path": [
+      "PNP",
+      "KKDE",
+      "UMB"
+     ],
+     "ecr_after": {
+      "from": "UMB",
+      "to": "SRE",
+      "label": "Not in sheet",
+      "note": "Rake returns to SRE for PM through services not listed in the sheet"
+     }
+    }
+   ]
   }
  ]
 }

@@ -40,7 +40,7 @@
       const nx = svcs[i + 1];
       const toAbs = nx ? nx.depAbs : first.depAbs + cycle;
       const next = nx || first;
-      const ecr = s.to !== next.from ? { from: s.to, to: next.from, note: s.ecr_after ? s.ecr_after.note : '' } : null;
+      const ecr = s.to !== next.from ? { from: s.to, to: next.from, note: s.ecr_after ? s.ecr_after.note : '', label: (s.ecr_after && s.ecr_after.label) || 'Empty rake' } : null;
       return { at: s.to, fromAbs: s.arrAbs, toAbs, mins: toAbs - s.arrAbs, next, wraps: !nx, ecr };
     });
     svcs.forEach((s, i) => { s.haltAfter = halts[i]; });
@@ -49,7 +49,7 @@
     const route = [{ code: first.from }];
     svcs.forEach((s, i) => {
       route.push({ code: s.to, svc: s });
-      if (halts[i].ecr && svcs[i + 1]) route.push({ code: halts[i].ecr.to, ecr: true });
+      if (halts[i].ecr && (svcs[i + 1] || halts[i].ecr.label !== 'Empty rake' || s.ecr_after)) route.push({ code: halts[i].ecr.to, ecr: true, label: halts[i].ecr.label });
     });
     return { services: svcs, halts, days, cycle, closed, route, start: first.depAbs };
   }
