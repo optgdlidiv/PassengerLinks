@@ -110,12 +110,12 @@
   /* ---------- heading ---------- */
   function renderHead() {
     const l = state.link;
-    $('#linkChips').replaceChildren(
+    $('#linkChips').replaceChildren(...[
       el('span', { class: 'chip brand' }, `Link ${String(l.no).padStart(2, '0')}`),
       el('span', { class: 'chip' }, `${l.cars} car ${l.stock}`),
-      el('span', { class: 'chip' }, `PM depot: ${l.pm_depot}`),
+      l.pm_depot ? el('span', { class: 'chip' }, `PM depot: ${l.pm_depot}`) : null,
       el('span', { class: 'chip' }, `Timings: ${l.timing_source}`),
-    );
+    ].filter(Boolean));
     $('#linkTitle').textContent = l.name;
     $('#linkNote').textContent = l.notes || '';
   }
@@ -138,18 +138,15 @@
         onclick: () => select({ type: 'stn', code }),
       }, code));
     });
-    $('#routeHint').textContent = `${m.services.length} services over ${m.days} day${m.days > 1 ? 's' : ''} · starts and ends at ${l.pm_station} (PM)`;
+    const base = m.services[0].from;
+    $('#routeHint').textContent = `${m.services.length} services over ${m.days} day${m.days > 1 ? 's' : ''} · starts and ends at ${base}${base === l.pm_station ? ' (PM)' : ''}`;
 
     // rakes
     $('#rakesVal').textContent = String(l.rakes);
     const rh = $('#rakesHint');
-    if (m.days !== l.rakes) {
-      rh.className = 'hint warn';
-      rh.textContent = `Timings below return to ${l.pm_station} after ${m.days} days; sheet shows ${l.rakes_in_sheet}. Check the full ICMS link.`;
-    } else {
-      rh.className = 'hint';
-      rh.textContent = `${m.days}-day cycle · sheet shows ${l.rakes_in_sheet}`;
-    }
+    rh.className = 'hint';
+    rh.textContent = `Rake cycle shown: ${m.days} day${m.days > 1 ? 's' : ''} · sheet shows ${l.rakes_in_sheet}`
+      + (l.rakes_note ? ` · ${l.rakes_note}` : '');
 
     // longest halt
     const hs = m.halts.filter((h) => !h.ecr).sort((a, b) => b.mins - a.mins);

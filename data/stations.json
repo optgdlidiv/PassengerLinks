@@ -91,6 +91,23 @@
    "name": "Hazrat Nizamuddin",
    "lat": 28.588,
    "lon": 77.2536
+  },
+  "JIND": {
+   "name": "Jind Jn",
+   "lat": 29.3165,
+   "lon": 76.3172
+  },
+  "ROK": {
+   "name": "Rohtak Jn",
+   "lat": 28.8955,
+   "lon": 76.596,
+   "via_only": true
+  },
+  "BGZ": {
+   "name": "Bahadurgarh",
+   "lat": 28.692,
+   "lon": 76.93,
+   "via_only": true
   }
  },
  "paths": {
@@ -238,6 +255,32 @@
    "DLI",
    "NDLS",
    "GZB"
+  ],
+  "JIND-NDLS": [
+   "JIND",
+   "ROK",
+   "BGZ",
+   "DLI",
+   "NDLS"
+  ],
+  "NDLS-JIND": [
+   "NDLS",
+   "DLI",
+   "BGZ",
+   "ROK",
+   "JIND"
+  ],
+  "JIND-DLI": [
+   "JIND",
+   "ROK",
+   "BGZ",
+   "DLI"
+  ],
+  "DLI-JIND": [
+   "DLI",
+   "BGZ",
+   "ROK",
+   "JIND"
   ]
  }
 }
