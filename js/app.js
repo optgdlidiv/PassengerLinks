@@ -175,8 +175,9 @@
   function renderMap() {
     if (!map) {
       map = L.map('map', { scrollWheelZoom: false });
-      L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`, {
-        maxZoom: 18, subdomains: 'abcd', attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
       lineLayer = L.layerGroup().addTo(map);
       stnLayer = L.layerGroup().addTo(map);
