@@ -145,6 +145,17 @@
    "name": "Shakurbasti",
    "lat": 28.683,
    "lon": 77.143
+  },
+  "MB": {
+   "name": "Moradabad",
+   "lat": 28.8386,
+   "lon": 78.7733
+  },
+  "HPU": {
+   "name": "Hapur",
+   "lat": 28.7306,
+   "lon": 77.7759,
+   "via_only": true
   }
  },
  "paths": {
@@ -388,6 +399,24 @@
   ],
   "NZM-GZB": [
    "NZM",
+   "GZB"
+  ],
+  "GZB-MTC": [
+   "GZB",
+   "MTC"
+  ],
+  "MTC-GZB": [
+   "MTC",
+   "GZB"
+  ],
+  "GZB-MB": [
+   "GZB",
+   "HPU",
+   "MB"
+  ],
+  "MB-GZB": [
+   "MB",
+   "HPU",
    "GZB"
   ]
  }

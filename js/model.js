@@ -40,7 +40,7 @@
       const nx = svcs[i + 1];
       const toAbs = nx ? nx.depAbs : first.depAbs + cycle;
       const next = nx || first;
-      const ecr = s.to !== next.from ? { from: s.to, to: next.from, note: s.ecr_after ? s.ecr_after.note : '', label: (s.ecr_after && s.ecr_after.label) || 'Empty rake' } : null;
+      const ecr = (s.to !== next.from || s.ecr_after) ? { from: s.to, to: next.from, note: s.ecr_after ? s.ecr_after.note : '', label: (s.ecr_after && s.ecr_after.label) || 'Empty rake' } : null;
       return { at: s.to, fromAbs: s.arrAbs, toAbs, mins: toAbs - s.arrAbs, next, wraps: !nx, ecr };
     });
     svcs.forEach((s, i) => { s.haltAfter = halts[i]; });

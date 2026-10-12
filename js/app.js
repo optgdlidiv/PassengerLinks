@@ -171,7 +171,7 @@
         const prev = m.services[idx - 1];
         if (i === 0 && prev && prev.haltAfter.ecr) {
           flow.append(el('div', { class: 'seg ecr', title: prev.haltAfter.ecr.note || prev.haltAfter.ecr.label },
-            el('div', { class: 'no' }, prev.haltAfter.ecr.label), el('div', { class: 'bar' }), el('div', { class: 'rt' }, `${prev.to} → ${s.from}`)));
+            el('div', { class: 'no' }, prev.haltAfter.ecr.label), el('div', { class: 'bar' }), el('div', { class: 'rt' }, ecrSpan(prev.haltAfter.ecr))));
         }
         if (i === 0) {
           // opening node of the day
@@ -186,7 +186,7 @@
         const h = s.haltAfter;
         const lines = [el('div', { class: 't' }, 'arr ', el('b', {}, s.arr), tag(s.arr_tag))];
         if (h.ecr) {
-          lines.push(el('div', { class: 't ecr-t' }, `${h.ecr.label} to ${h.ecr.to}`));
+          lines.push(el('div', { class: 't ecr-t' }, h.ecr.from === h.ecr.to ? h.ecr.label : `${h.ecr.label} to ${h.ecr.to}`));
         } else if (nx && nx.dep_day === d) {
           lines.push(el('div', { class: 't' }, 'dep ', el('b', {}, nx.dep), tag(nx.dep_tag)));
         } else if (nx) {
@@ -201,13 +201,14 @@
         flow.append(node(s.to, lines, haltTxt, !stnInDiv(s.to)));
         if (h.ecr && nx && nx.dep_day === d) {
           flow.append(el('div', { class: 'seg ecr', title: h.ecr.note || h.ecr.label },
-            el('div', { class: 'no' }, h.ecr.label), el('div', { class: 'bar' }), el('div', { class: 'rt' }, `${h.ecr.from} → ${h.ecr.to}`)));
+            el('div', { class: 'no' }, h.ecr.label), el('div', { class: 'bar' }), el('div', { class: 'rt' }, ecrSpan(h.ecr))));
           flow.append(node(h.ecr.to, [el('div', { class: 't' }, 'dep ', el('b', {}, nx.dep), tag(nx.dep_tag))], null, false));
         }
       });
       box.append(el('div', { class: 'day' }, el('div', { class: 'day-lbl' }, 'Day', el('b', {}, String(d))), flow));
     }
   }
+  function ecrSpan(e) { return e.from === e.to ? `ex ${e.from}` : `${e.from} → ${e.to}`; }
   function node(code, lines, halt, oth) {
     return el('div', { class: 'node' + (oth ? ' oth' : ''), 'data-stn': code, title: stnName(code), onclick: () => select({ type: 'stn', code }) },
       el('div', { class: 'code' }, code), ...lines, halt);
@@ -321,7 +322,7 @@
       if (node) { node.textContent = p.at; node.classList.remove('running'); }
       const nx = p.halt.next;
       msg = p.halt.ecr
-        ? [el('b', {}, `${p.halt.ecr.label} ${p.halt.ecr.from} → ${p.halt.ecr.to}`), ` · arr ${p.halt.ecr.from} ${M.hhmm(p.halt.fromAbs)}, next ${nx.train_no} dep ${nx.from} D${nx.dep_day} ${nx.dep}`]
+        ? [el('b', {}, `${p.halt.ecr.label} ${ecrSpan(p.halt.ecr)}`), ` · arr ${p.halt.ecr.from} ${M.hhmm(p.halt.fromAbs)}, next ${nx.train_no} dep ${nx.from} D${nx.dep_day} ${nx.dep}`]
         : [el('b', {}, `At ${stnName(p.at)}`), ` · next ${nx.train_no} dep D${p.halt.wraps ? 1 : nx.dep_day} ${nx.dep}`];
     }
     $('#nowBoard').replaceChildren(el('i'), el('span', {}, ...msg));
@@ -390,7 +391,7 @@
       const g = s('g', { class: 'halt' });
       const y = tlRowY(d);
       g.append(s('rect', { x: tlX(a), y: y + 9, width: Math.max(0, tlX(b) - tlX(a)), height: 8, rx: 3 }));
-      if (tlX(b) - tlX(a) > 34) g.append(s('text', { x: (tlX(a) + tlX(b)) / 2, y: y + 32, 'text-anchor': 'middle' }, h.ecr ? `${h.ecr.label === 'Empty rake' ? 'ECR' : h.ecr.label} ${h.ecr.from}→${h.ecr.to}` : h.at));
+      if (tlX(b) - tlX(a) > 34) g.append(s('text', { x: (tlX(a) + tlX(b)) / 2, y: y + 32, 'text-anchor': 'middle' }, h.ecr ? `${h.ecr.label === 'Empty rake' ? 'ECR' : h.ecr.label} ${h.ecr.from === h.ecr.to ? '' : h.ecr.from + '→' + h.ecr.to}` : h.at));
       g.addEventListener('mousemove', (e) => tip(e, `<b>${h.at}</b> halt ${M.dur(h.mins)}<br>${M.stamp(h.fromAbs)} → ${h.wraps ? 'next cycle ' + M.hhmm(h.toAbs) : M.stamp(h.toAbs)}`));
       g.addEventListener('mouseleave', hideTip);
       g.addEventListener('click', (e) => { e.stopPropagation(); select({ type: 'stn', code: h.at }); });

@@ -1201,6 +1201,91 @@
      }
     }
    ]
+  },
+  {
+   "no": 9,
+   "name": "GZB-MTC-MB",
+   "sheet_title": "11. 12 CAR MEMU (01 RAKE)",
+   "stock": "MEMU",
+   "cars": 12,
+   "rakes": 3,
+   "rakes_in_sheet": 1,
+   "pm_depot": "CYZ",
+   "pm_station": "GZB",
+   "timing_source": "ICMS rake link (64553 from sheet)",
+   "notes": "Only trains in the sheet are shown. After 64554 the rake works services beyond MB that are not in the sheet. 64553 is placed on the last day of the 3-day cycle, before PM at GZB 09:00; its timing is from the sheet.",
+   "services": [
+    {
+     "seq": 1,
+     "train_no": "64555",
+     "from": "GZB",
+     "dep": "09:00",
+     "dep_day": 1,
+     "to": "MTC",
+     "arr": "10:10",
+     "arr_day": 1,
+     "dep_tag": "PM",
+     "in_division": true,
+     "sheet": {
+      "dep": "09:00",
+      "arr": "10:10"
+     }
+    },
+    {
+     "seq": 2,
+     "train_no": "64556",
+     "from": "MTC",
+     "dep": "16:25",
+     "dep_day": 1,
+     "to": "GZB",
+     "arr": "17:35",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "16:25",
+      "arr": "17:35"
+     }
+    },
+    {
+     "seq": 3,
+     "train_no": "64554",
+     "from": "GZB",
+     "dep": "18:22",
+     "dep_day": 1,
+     "to": "MB",
+     "arr": "22:55",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "18:20",
+      "arr": "22:50"
+     },
+     "ecr_after": {
+      "from": "MB",
+      "to": "MB",
+      "label": "Not in sheet",
+      "note": "Rake works services beyond MB (BE / ROZA side) that are not in the sheet, then returns to MB for 64553"
+     }
+    },
+    {
+     "seq": 4,
+     "train_no": "64553",
+     "from": "MB",
+     "dep": "05:10",
+     "dep_day": 4,
+     "to": "GZB",
+     "arr": "08:40",
+     "arr_day": 4,
+     "dep_tag": null,
+     "in_division": true,
+     "sheet": {
+      "dep": "05:10",
+      "arr": "08:40"
+     }
+    }
+   ]
   }
  ]
 }
