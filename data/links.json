@@ -1842,6 +1842,123 @@
      }
     }
    ]
+  },
+  {
+   "no": 11,
+   "name": "DLI-DKDE-SSB-KRJ-GZB",
+   "sheet_title": "13. 12 CAR EMU (01 RAKE)",
+   "stock": "EMU",
+   "cars": 12,
+   "rakes": 1,
+   "rakes_in_sheet": 1,
+   "pm_depot": "CYZ",
+   "pm_station": "DLI",
+   "timing_source": "ICMS rake link",
+   "notes": "Daily link. Empty rake (ECR) GZB \u2192 DLI after 64113 to work 64104 (04932).",
+   "services": [
+    {
+     "seq": 1,
+     "train_no": "64104",
+     "from": "DLI",
+     "dep": "05:15",
+     "dep_day": 1,
+     "to": "DKDE",
+     "arr": "06:45",
+     "arr_day": 1,
+     "dep_tag": "PM",
+     "in_division": true,
+     "sheet": {
+      "dep": "05:15",
+      "arr": "06:45"
+     }
+    },
+    {
+     "seq": 2,
+     "train_no": "64109",
+     "from": "DKDE",
+     "dep": "07:00",
+     "dep_day": 1,
+     "to": "SSB",
+     "arr": "09:40",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "07:00",
+      "arr": "09:20"
+     }
+    },
+    {
+     "seq": 3,
+     "train_no": "64112",
+     "from": "SSB",
+     "dep": "11:20",
+     "dep_day": 1,
+     "to": "DKDE",
+     "arr": "13:50",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "11:20",
+      "arr": "13:50"
+     }
+    },
+    {
+     "seq": 4,
+     "train_no": "64107",
+     "from": "DKDE",
+     "dep": "15:20",
+     "dep_day": 1,
+     "to": "DLI",
+     "arr": "16:55",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "15:20",
+      "arr": "16:55"
+     }
+    },
+    {
+     "seq": 5,
+     "train_no": "64106",
+     "from": "DLI",
+     "dep": "18:30",
+     "dep_day": 1,
+     "to": "KRJ",
+     "arr": "20:35",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "18:30",
+      "arr": "20:35"
+     }
+    },
+    {
+     "seq": 6,
+     "train_no": "64113",
+     "from": "KRJ",
+     "dep": "20:50",
+     "dep_day": 1,
+     "to": "GZB",
+     "arr": "22:25",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "20:50",
+      "arr": "22:15"
+     },
+     "ecr_after": {
+      "from": "GZB",
+      "to": "DLI",
+      "label": "Empty rake",
+      "note": "ECR GZB \u2192 DLI for 64104 (04932)"
+     }
+    }
+   ]
   }
  ]
 }

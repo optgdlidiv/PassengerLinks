@@ -166,6 +166,11 @@
    "name": "Roza Jn",
    "lat": 27.8908,
    "lon": 79.8947
+  },
+  "DKDE": {
+   "name": "Dankaur",
+   "lat": 28.351,
+   "lon": 77.555
   }
  },
  "paths": {
@@ -462,6 +467,7 @@
   "DLI-KRJ": [
    "DLI",
    "GZB",
+   "DKDE",
    "KRJ"
   ],
   "KRJ-SSB": [
@@ -498,6 +504,33 @@
    "PWL",
    "NZM",
    "NDLS"
+  ],
+  "DLI-DKDE": [
+   "DLI",
+   "GZB",
+   "DKDE"
+  ],
+  "DKDE-DLI": [
+   "DKDE",
+   "GZB",
+   "DLI"
+  ],
+  "DKDE-SSB": [
+   "DKDE",
+   "GZB",
+   "NDLS",
+   "SSB"
+  ],
+  "SSB-DKDE": [
+   "SSB",
+   "NDLS",
+   "GZB",
+   "DKDE"
+  ],
+  "KRJ-GZB": [
+   "KRJ",
+   "DKDE",
+   "GZB"
   ]
  }
 }

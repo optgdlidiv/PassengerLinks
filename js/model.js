@@ -44,7 +44,8 @@
       return { at: s.to, fromAbs: s.arrAbs, toAbs, mins: toAbs - s.arrAbs, next, wraps: !nx, ecr };
     });
     svcs.forEach((s, i) => { s.haltAfter = halts[i]; });
-    const closed = last.to === first.from;
+    const lastHalt = halts[halts.length - 1];
+    const closed = last.to === first.from || !!(lastHalt.ecr && lastHalt.ecr.to === first.from);
     // stations in working order; an empty-rake move adds the station the rake is moved to
     const route = [{ code: first.from }];
     svcs.forEach((s, i) => {
