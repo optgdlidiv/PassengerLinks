@@ -1204,7 +1204,7 @@
   },
   {
    "no": 9,
-   "name": "GZB-MTC-MB",
+   "name": "GZB-MTC-MB-BE-ROZA",
    "sheet_title": "11. 12 CAR MEMU (01 RAKE)",
    "stock": "MEMU",
    "cars": 12,
@@ -1212,8 +1212,8 @@
    "rakes_in_sheet": 1,
    "pm_depot": "CYZ",
    "pm_station": "GZB",
-   "timing_source": "ICMS rake link (64553 from sheet)",
-   "notes": "Only trains in the sheet are shown. After 64554 the rake works services beyond MB that are not in the sheet. 64553 is placed on the last day of the 3-day cycle, before PM at GZB 09:00; its timing is from the sheet.",
+   "timing_source": "ICMS rake link",
+   "notes": "Services MB\u2013BE\u2013ROZA\u2013BE\u2013MB run outside Delhi Division and are not listed in the sheet.",
    "services": [
     {
      "seq": 1,
@@ -1261,16 +1261,58 @@
      "sheet": {
       "dep": "18:20",
       "arr": "22:50"
-     },
-     "ecr_after": {
-      "from": "MB",
-      "to": "MB",
-      "label": "Not in sheet",
-      "note": "Rake works services beyond MB (BE / ROZA side) that are not in the sheet, then returns to MB for 64553"
      }
     },
     {
-     "seq": 4,
+     "train_no": "64178",
+     "from": "MB",
+     "dep": "07:25",
+     "dep_day": 2,
+     "to": "BE",
+     "arr": "12:00",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": false,
+     "seq": 4
+    },
+    {
+     "train_no": "64176",
+     "from": "BE",
+     "dep": "20:00",
+     "dep_day": 2,
+     "to": "ROZA",
+     "arr": "22:05",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": false,
+     "seq": 5
+    },
+    {
+     "train_no": "64175",
+     "from": "ROZA",
+     "dep": "05:45",
+     "dep_day": 3,
+     "to": "BE",
+     "arr": "09:00",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": false,
+     "seq": 6
+    },
+    {
+     "train_no": "64177",
+     "from": "BE",
+     "dep": "14:40",
+     "dep_day": 3,
+     "to": "MB",
+     "arr": "19:43",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": false,
+     "seq": 7
+    },
+    {
+     "seq": 8,
      "train_no": "64553",
      "from": "MB",
      "dep": "05:10",
@@ -1278,7 +1320,7 @@
      "to": "GZB",
      "arr": "08:40",
      "arr_day": 4,
-     "dep_tag": null,
+     "dep_tag": "SM",
      "in_division": true,
      "sheet": {
       "dep": "05:10",
