@@ -1959,6 +1959,266 @@
      }
     }
    ]
+  },
+  {
+   "no": 12,
+   "name": "GZB-PWL-SSB-BVH-NDLS-SBB",
+   "sheet_title": "14. 12 CAR EMU (03 RAKE)",
+   "stock": "EMU",
+   "cars": 12,
+   "rakes": 3,
+   "rakes_in_sheet": 3,
+   "pm_depot": "CYZ",
+   "pm_station": "GZB",
+   "timing_source": "ICMS rake link",
+   "notes": "",
+   "services": [
+    {
+     "seq": 1,
+     "train_no": "64906",
+     "from": "GZB",
+     "dep": "17:10",
+     "dep_day": 1,
+     "to": "PWL",
+     "arr": "19:55",
+     "arr_day": 1,
+     "dep_tag": "PM",
+     "in_division": true,
+     "sheet": {
+      "dep": "17:10",
+      "arr": "19:55"
+     },
+     "path": [
+      "GZB",
+      "DLI",
+      "NDLS",
+      "NZM",
+      "BVH",
+      "PWL"
+     ],
+     "arr_tag": "R"
+    },
+    {
+     "seq": 2,
+     "train_no": "64053",
+     "from": "PWL",
+     "dep": "06:00",
+     "dep_day": 2,
+     "to": "GZB",
+     "arr": "08:40",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "06:00",
+      "arr": "08:40"
+     }
+    },
+    {
+     "seq": 3,
+     "train_no": "64031",
+     "from": "GZB",
+     "dep": "09:00",
+     "dep_day": 2,
+     "to": "SSB",
+     "arr": "10:30",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "09:00",
+      "arr": "10:30"
+     }
+    },
+    {
+     "seq": 4,
+     "train_no": "64016",
+     "from": "SSB",
+     "dep": "14:30",
+     "dep_day": 2,
+     "to": "PWL",
+     "arr": "19:15",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "14:30",
+      "arr": "16:45"
+     }
+    },
+    {
+     "seq": 5,
+     "train_no": "64019",
+     "from": "PWL",
+     "dep": "19:45",
+     "dep_day": 2,
+     "to": "SSB",
+     "arr": "00:45",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "22:20",
+      "arr": "00:45"
+     },
+     "path": [
+      "PWL",
+      "BVH",
+      "NZM",
+      "NDLS",
+      "SSB"
+     ]
+    },
+    {
+     "seq": 6,
+     "train_no": "64908",
+     "from": "SSB",
+     "dep": "05:50",
+     "dep_day": 3,
+     "to": "BVH",
+     "arr": "07:35",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "05:50",
+      "arr": "07:35"
+     }
+    },
+    {
+     "seq": 7,
+     "train_no": "64071",
+     "from": "BVH",
+     "dep": "08:00",
+     "dep_day": 3,
+     "to": "SSB",
+     "arr": "09:55",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "08:00",
+      "arr": "09:55"
+     }
+    },
+    {
+     "seq": 8,
+     "train_no": "64018",
+     "from": "SSB",
+     "dep": "17:15",
+     "dep_day": 3,
+     "to": "NDLS",
+     "arr": "17:52",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "17:15",
+      "arr": "17:52"
+     }
+    },
+    {
+     "seq": 9,
+     "train_no": "64082",
+     "from": "NDLS",
+     "dep": "18:00",
+     "dep_day": 3,
+     "to": "PWL",
+     "arr": "21:00",
+     "arr_day": 3,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "18:00",
+      "arr": "19:40"
+     }
+    },
+    {
+     "seq": 10,
+     "train_no": "64051",
+     "from": "PWL",
+     "dep": "21:45",
+     "dep_day": 3,
+     "to": "GZB",
+     "arr": "01:40",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "23:05",
+      "arr": "01:40"
+     }
+    },
+    {
+     "seq": 11,
+     "train_no": "64437",
+     "from": "GZB",
+     "dep": "06:10",
+     "dep_day": 4,
+     "to": "DLI",
+     "arr": "07:50",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "06:10",
+      "arr": "07:40"
+     }
+    },
+    {
+     "seq": 12,
+     "train_no": "64402",
+     "from": "DLI",
+     "dep": "08:00",
+     "dep_day": 4,
+     "to": "SBB",
+     "arr": "08:30",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "07:45",
+      "arr": "08:20"
+     }
+    },
+    {
+     "seq": 13,
+     "train_no": "64411",
+     "from": "SBB",
+     "dep": "08:50",
+     "dep_day": 4,
+     "to": "DLI",
+     "arr": "10:00",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "08:50",
+      "arr": "10:00"
+     },
+     "path": [
+      "SBB",
+      "NDLS",
+      "DLI"
+     ]
+    },
+    {
+     "seq": 14,
+     "train_no": "64408",
+     "from": "DLI",
+     "dep": "10:10",
+     "dep_day": 4,
+     "to": "GZB",
+     "arr": "10:55",
+     "arr_day": 4,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "10:10",
+      "arr": "10:55"
+     }
+    }
+   ]
   }
  ]
 }
