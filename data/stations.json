@@ -132,20 +132,14 @@
    "via_only": true
   },
   "TKJ": {
-   "name": "Tughlakabad",
-   "lat": 28.5085,
-   "lon": 77.287
+   "name": "Tilak Bridge",
+   "lat": 28.628,
+   "lon": 77.242
   },
   "BSC": {
    "name": "Bulandshahr",
    "lat": 28.403,
    "lon": 77.857
-  },
-  "DER": {
-   "name": "Dadri",
-   "lat": 28.553,
-   "lon": 77.553,
-   "via_only": true
   }
  },
  "paths": {
@@ -360,16 +354,12 @@
   ],
   "TKJ-BSC": [
    "TKJ",
-   "NZM",
    "GZB",
-   "DER",
    "BSC"
   ],
   "BSC-TKJ": [
    "BSC",
-   "DER",
    "GZB",
-   "NZM",
    "TKJ"
   ]
  }
