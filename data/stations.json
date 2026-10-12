@@ -444,6 +444,60 @@
   "ROZA-BE": [
    "ROZA",
    "BE"
+  ],
+  "GZB-MTJ": [
+   "GZB",
+   "NZM",
+   "PWL",
+   "KSV",
+   "MTJ"
+  ],
+  "MTJ-GZB": [
+   "MTJ",
+   "KSV",
+   "PWL",
+   "NZM",
+   "GZB"
+  ],
+  "DLI-KRJ": [
+   "DLI",
+   "GZB",
+   "KRJ"
+  ],
+  "KRJ-SSB": [
+   "KRJ",
+   "GZB",
+   "NDLS",
+   "SSB"
+  ],
+  "SSB-PWL": [
+   "SSB",
+   "NDLS",
+   "NZM",
+   "PWL"
+  ],
+  "PWL-SSB": [
+   "PWL",
+   "NZM",
+   "NDLS",
+   "SSB"
+  ],
+  "SSB-DLI": [
+   "SSB",
+   "DLI"
+  ],
+  "DLI-PWL": [
+   "DLI",
+   "NDLS",
+   "NZM",
+   "PWL"
+  ],
+  "MTJ-NDLS": [
+   "MTJ",
+   "KSV",
+   "PWL",
+   "NZM",
+   "NDLS"
   ]
  }
 }
