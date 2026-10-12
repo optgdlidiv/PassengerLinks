@@ -130,6 +130,22 @@
    "lat": 28.9845,
    "lon": 77.7064,
    "via_only": true
+  },
+  "TKJ": {
+   "name": "Tughlakabad",
+   "lat": 28.5085,
+   "lon": 77.287
+  },
+  "BSC": {
+   "name": "Bulandshahr",
+   "lat": 28.403,
+   "lon": 77.857
+  },
+  "DER": {
+   "name": "Dadri",
+   "lat": 28.553,
+   "lon": 77.553,
+   "via_only": true
   }
  },
  "paths": {
@@ -341,6 +357,20 @@
   "UMB-SRE": [
    "UMB",
    "SRE"
+  ],
+  "TKJ-BSC": [
+   "TKJ",
+   "NZM",
+   "GZB",
+   "DER",
+   "BSC"
+  ],
+  "BSC-TKJ": [
+   "BSC",
+   "DER",
+   "GZB",
+   "NZM",
+   "TKJ"
   ]
  }
 }

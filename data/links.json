@@ -1053,6 +1053,53 @@
      }
     }
    ]
+  },
+  {
+   "no": 7,
+   "name": "TKJ-BSC",
+   "sheet_title": "9. 20 CAR MEMU (01 RAKE)",
+   "stock": "MEMU",
+   "cars": 20,
+   "rakes": 1,
+   "rakes_in_sheet": 1,
+   "pm_depot": "GZB",
+   "pm_station": null,
+   "timing_source": "ICMS rake link",
+   "notes": "Daily shuttle; both ends are RBPC points. ICMS shows no PM station inside the link.",
+   "services": [
+    {
+     "seq": 1,
+     "train_no": "64568",
+     "from": "TKJ",
+     "dep": "18:15",
+     "dep_day": 1,
+     "to": "BSC",
+     "arr": "21:55",
+     "arr_day": 1,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "18:15",
+      "arr": "21:55"
+     }
+    },
+    {
+     "seq": 2,
+     "train_no": "64567",
+     "from": "BSC",
+     "dep": "05:35",
+     "dep_day": 2,
+     "to": "TKJ",
+     "arr": "09:25",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "05:35",
+      "arr": "09:15"
+     }
+    }
+   ]
   }
  ]
 }
