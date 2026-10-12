@@ -1100,6 +1100,107 @@
      }
     }
    ]
+  },
+  {
+   "no": 8,
+   "name": "GZB-NDLS-PWL-SSB-NZM",
+   "sheet_title": "10. 12 CAR EMU (01 RAKE)",
+   "stock": "EMU",
+   "cars": 12,
+   "rakes": 1,
+   "rakes_in_sheet": 1,
+   "pm_depot": "CYZ",
+   "pm_station": "GZB",
+   "timing_source": "ICMS rake link",
+   "notes": "Empty rake (ECR) SSB \u2192 NZM to work 64419.",
+   "services": [
+    {
+     "seq": 1,
+     "train_no": "64409",
+     "from": "GZB",
+     "dep": "22:35",
+     "dep_day": 1,
+     "to": "NDLS",
+     "arr": "23:45",
+     "arr_day": 1,
+     "dep_tag": "PM",
+     "in_division": true,
+     "sheet": {
+      "dep": "22:35",
+      "arr": "23:45"
+     }
+    },
+    {
+     "seq": 2,
+     "train_no": "64076",
+     "from": "NDLS",
+     "dep": "00:15",
+     "dep_day": 2,
+     "to": "PWL",
+     "arr": "01:35",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "00:15",
+      "arr": "01:35"
+     }
+    },
+    {
+     "seq": 3,
+     "train_no": "64077",
+     "from": "PWL",
+     "dep": "07:50",
+     "dep_day": 2,
+     "to": "NDLS",
+     "arr": "09:25",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "07:50",
+      "arr": "09:25"
+     }
+    },
+    {
+     "seq": 4,
+     "train_no": "64095",
+     "from": "NDLS",
+     "dep": "09:50",
+     "dep_day": 2,
+     "to": "SSB",
+     "arr": "11:00",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "09:50",
+      "arr": "11:00"
+     },
+     "ecr_after": {
+      "from": "SSB",
+      "to": "NZM",
+      "label": "Empty rake",
+      "note": "ECR SSB \u2192 NZM to work 64419"
+     }
+    },
+    {
+     "seq": 5,
+     "train_no": "64419",
+     "from": "NZM",
+     "dep": "15:45",
+     "dep_day": 2,
+     "to": "GZB",
+     "arr": "17:30",
+     "arr_day": 2,
+     "dep_tag": "RBPC",
+     "in_division": true,
+     "sheet": {
+      "dep": "15:45",
+      "arr": "17:30"
+     }
+    }
+   ]
   }
  ]
 }

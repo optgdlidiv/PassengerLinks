@@ -140,6 +140,11 @@
    "name": "Bulandshahr",
    "lat": 28.403,
    "lon": 77.857
+  },
+  "SSB": {
+   "name": "Shakurbasti",
+   "lat": 28.683,
+   "lon": 77.143
   }
  },
  "paths": {
@@ -361,6 +366,29 @@
    "BSC",
    "GZB",
    "TKJ"
+  ],
+  "NDLS-PWL": [
+   "NDLS",
+   "NZM",
+   "PWL"
+  ],
+  "PWL-NDLS": [
+   "PWL",
+   "NZM",
+   "NDLS"
+  ],
+  "NDLS-SSB": [
+   "NDLS",
+   "SSB"
+  ],
+  "SSB-NZM": [
+   "SSB",
+   "NDLS",
+   "NZM"
+  ],
+  "NZM-GZB": [
+   "NZM",
+   "GZB"
   ]
  }
 }
